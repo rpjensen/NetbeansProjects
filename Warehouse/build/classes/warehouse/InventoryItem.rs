@@ -1,0 +1,1 @@
+warehousePackage.InventoryItem
