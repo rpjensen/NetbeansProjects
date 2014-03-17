@@ -52,7 +52,7 @@ public class Person {
     /**
      * Tests whether two people are equal
      * @param object the object to test against
-     * @return true if equal, false else
+     * @return true if equal, else false
      */
     @Override
     public boolean equals(Object object){
