@@ -11,8 +11,8 @@ package inheritancelab;
  * @author jensenrp
  */
 public class Person {
-        protected String name;
-        protected int age;
+    protected String name;
+    protected int age;
     
     public Person(String name, int age){
         this.name = name;
@@ -47,5 +47,12 @@ public class Person {
         if (!(object instanceof Person)){
             return false;
         }
+        Person p = (Person)object;
+        return name.equals(p.name) && age == p.age;
+    }
+    
+    @Override
+    public String toString(){
+        return String.format("Name = %s age = %d", name, age);
     }
 }
