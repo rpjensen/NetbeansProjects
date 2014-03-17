@@ -16,7 +16,7 @@ public class MagicSquareDriver {
         mS1.setSizeFromUser();
         int mSOneSize = mS1.getSize();
         mS1.printTestedMagicSquare();
-        System.out.println("The size of the first matrix is " + mSOneSize);
+        /*System.out.println("The size of the first matrix is " + mSOneSize);
         
         System.out.println("2x2 matrix internal initilization test");
         MagicSquare mS2 = new MagicSquare(5);
@@ -33,7 +33,7 @@ public class MagicSquareDriver {
         System.out.println(mSThreeString);
         System.out.println(mS3.testMagicSquare());
         
-        
+        */
         
     }
     

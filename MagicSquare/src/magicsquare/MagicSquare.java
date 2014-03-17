@@ -1,5 +1,3 @@
-
-
 package magicsquare;
 
 import java.util.Scanner;
