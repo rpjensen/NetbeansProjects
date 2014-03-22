@@ -11,6 +11,14 @@ import java.awt.Color;
  */
 public class Circle extends Ellipse{
     
+    /**
+     * Create and initialize a new circle defined by the center point, radius
+     * and color.
+     * @param centerX the x coordinate of the center
+     * @param centerY the y coordinate of the center
+     * @param radius the length of the radius
+     * @param color the color
+     */
     public Circle(double centerX, double centerY, double radius, Color color){
         super(centerX, centerY, radius, radius, color);
         //I am aware that the directions said to intialize with the upper left corner
@@ -20,6 +28,9 @@ public class Circle extends Ellipse{
         //is also expecting the shape to be defined by the center.
     }
     
+    /**
+     * @return the length of the radius
+     */
     public double getRadius(){
         return this.getHorizontalRadius();
     }

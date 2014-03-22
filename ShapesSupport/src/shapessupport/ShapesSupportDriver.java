@@ -7,13 +7,20 @@ import java.util.ArrayList;
 /**
  * Driver/tester class for programming assignment two
  * @author Ryan Jensen
- * @version April 2, 2014
+ * @version Mar 22, 2014
  */
 public class ShapesSupportDriver {
 
     /**
-     * 
-     * 
+     * 0) Tests toString and getters throughout
+     * 1) Creates shapes
+     * 2) Tests setting the visibility
+     * 3) Tests unsetting the visibility
+     * 4) Tests against equal objects unequal references
+     * 5) Tests against equal references
+     * 6) Tests Translation
+     * 7) Tests Dilation
+     * 8) Tests changing the color
      */
     public static void main(String[] args) {
         ArrayList<Figure> figures = new ArrayList<>();
@@ -24,13 +31,25 @@ public class ShapesSupportDriver {
         
         for (int i = 0; i < figures.size(); i++){
             boolean expectedVisibility = (Math.random() < .5) ? true : false;
-            if (Math.random() < .5){
+            if (expectedVisibility){
                 figures.get(i).makeVisible();
             }
             System.out.printf("%s ---- %B\n", figures.get(i), expectedVisibility);
         }
         System.out.println();
         System.out.println();
+        
+        for (int i = 0; i < figures.size(); i++){
+            figures.get(i).makeVisible();
+            boolean expectedVisibility = (Math.random() < .5) ? true : false;
+            if (expectedVisibility){
+                figures.get(i).makeInVisible();
+            }
+            System.out.printf("%s ---- %s\n", figures.get(i), expectedVisibility ? "Invisible" : "Visible");
+        }
+        System.out.println();
+        System.out.println();
+        
         figures.add(new Rectangle(0,0,100,200, Color.BLACK));
         figures.add(new Square(100, 150, 50, Color.RED));
         figures.add(new Ellipse(50, 150, 50, 100, Color.ORANGE));
