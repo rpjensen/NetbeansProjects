@@ -12,10 +12,20 @@ import java.awt.Color;
  */
 public class Square extends Rectangle{
     
+    /**
+     * Creates and initializes a new square.  Note new squares are set to be invisible
+     * @param xCoord the x coordinate of the upper left corner
+     * @param yCoord the y coordinate of the upper left corner
+     * @param length the side length
+     * @param color  the color
+     */
     public Square(double xCoord, double yCoord, double length, Color color){
         super(xCoord, yCoord, length, length, color);
     }
     
+    /**
+     * @return the side length
+     */
     public double getLength(){
         return this.getWidth();
     }
