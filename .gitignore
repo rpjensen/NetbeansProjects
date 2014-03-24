@@ -15,3 +15,4 @@ nb-configuration.xml
 *.war
 *.ear
 /BugCrawlViewer/nbproject/private/
+/List_Lab_08/nbproject/private/
