@@ -68,7 +68,7 @@ public abstract class Figure {
     }
     
     /**
-     * Translate the figure by the given coordinates.
+     * Translate the figure by the given distances.
      * @param xDisplacement the x displacement (x>0 right, x<0 left)
      * @param yDisplacement the y displacement (y>0 down, y<0 up)
      */
@@ -80,7 +80,7 @@ public abstract class Figure {
     }
     
     /**
-     * Tests the equality of two figures.  Doesn't know about the shape inside
+     * Tests the equality of two figures.  A figure doesn't know about the shape inside
      * the figure.  To test whether two shapes differ us a most specific equality
      * test. (Note equality is not determined by visibility)
      * @param object the figure to test against
