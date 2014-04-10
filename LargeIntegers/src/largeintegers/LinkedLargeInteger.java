@@ -35,7 +35,7 @@ public class LinkedLargeInteger implements LargeInteger{
         this.mostSignificantDigit = this.sign;
         
         do{
-            this.mostSignificantDigit.next = new Node((int)(number % 10), this.mostSignificantDigit, null);
+            this.mostSignificantDigit.next = new Node((int)(number % 10), this.mostSignificantDigit);
             //new value is the ones digit of the current number
             number = number / 10;//throw away the ones digit for next iteration
             this.mostSignificantDigit = this.mostSignificantDigit.next;
@@ -44,7 +44,22 @@ public class LinkedLargeInteger implements LargeInteger{
         this.iter = new IntegerIterator();
     }
     
-    private LinkedLargeInteger(LargeIntegerBuilder builder){
+   /* private LinkedLargeInteger(LargeIntegerBuilder builder){
+        builder.iter.gotoLeastSignificantDigit();
+        //Initialize the first two
+        this.sign = new Node(builder.sign.data, null, new Node(builder.iter.current(), this.sign));
+        this.mostSignificantDigit = this.sign.next;
+        this.biggestDecimalPlace = 0;
+        this.iter = new IntegerIterator();
+        while (builder.iter.hasNext()){
+            this.iter.currentDecimalPlace.next = new Node(builder.iter.next(), this.iter.currentDecimalPlace);
+            this.iter.next();
+            this.mostSignificantDigit = this.iter.currentDecimalPlace;
+            this.biggestDecimalPlace++; 
+        }
+    }*/
+    
+    private LinkedLargeInteger(LinkedLargeInteger builder){
         builder.iter.gotoLeastSignificantDigit();
         //Initialize the first two
         this.sign = new Node(builder.sign.data, null, new Node(builder.iter.current(), this.sign));
@@ -71,6 +86,18 @@ public class LinkedLargeInteger implements LargeInteger{
     
     @Override
     public LinkedLargeInteger add(LinkedLargeInteger otherNum){
+        if (this.isZero() || otherNum.isZero()){return this.isZero() ? otherNum.copy() : this.copy();}
+        if (this.getSign() != otherNum.getSign()){return this.subtract(otherNum.negate());}
+        else {
+            LargeIntegerBuilder sum = this.addMagnatudes(otherNum);
+            if (this.getSign() > 0){sum.setSign(1);}
+            else {sum.setSign(-1);}
+            return sum.copy();
+        }
+    }
+    
+    @Override
+    public LinkedLargeInteger subtract(LinkedLargeInteger otherNum){
         
     }
     public Integer getIntegerAtDecimalPlace(int decimalPlace){
@@ -106,12 +133,68 @@ public class LinkedLargeInteger implements LargeInteger{
     public Integer getMostSignificantDigit(){
         return this.mostSignificantDigit.data;
     }
+        
+    public boolean isZero(){
+        return this.mostSignificantDigit == this.sign.next && this.mostSignificantDigit.data == 0;
+    }
     
+    @Override
+    public int compareTo(LinkedLargeInteger otherNum){
+        if (this.getSign() > otherNum.getSign()){return 1;}
+        if (this.getSign() < otherNum.getSign()){return -1;}
+        if (this.isZero() && otherNum.isZero()){return 0;}
+        //They now must have equal sign -- Compare magnitude and sign and return accordingly
+        if (this.largerMagnitude(otherNum) == 0){return 0;}
+        if (this.largerMagnitude(otherNum) > 0){return (this.getSign() > 0) ? 1 : -1;}
+        else{return (this.getSign() > 0) ? -1 : 1;}
+        //Catch all -- if the magnitude is smaller and it is positive return -1, but if
+        //negative return 1
+    }
+    
+    @Override
+    public boolean equals(Object object){
+        if (this == object){return true;}
+        if (!(object instanceof LinkedLargeInteger)){return false;}
+        return this.compareTo((LinkedLargeInteger)object) == 0;
+    }
+    
+    public LinkedLargeInteger copy(){
+        return new LinkedLargeInteger(this);
+    }
     //<<<<<<<<<<<<<<<<<<<<<< Private Helper Methods >>>>>>>>>>>>>>>>>>>>>>
     
     private LargeIntegerBuilder mutableCopy(){
         return new LargeIntegerBuilder(this);
     }
+    
+    private LargeIntegerBuilder addMagnatudes(LinkedLargeInteger otherNum){
+        LargeIntegerBuilder sum = new LargeIntegerBuilder();
+        int maxDecimalPlace = Math.max(this.biggestDecimalPlace, otherNum.biggestDecimalPlace);
+        for (int i = 0; i < maxDecimalPlace; i++){
+            sum.addToDecimalPlace(i, this.getIntegerAtDecimalPlace(i) + otherNum.getIntegerAtDecimalPlace(maxDecimalPlace));
+        }
+        return sum;
+    }
+    
+    private int largerMagnitude(LinkedLargeInteger otherNum){
+        if (this.biggestDecimalPlace == otherNum.biggestDecimalPlace){
+            if (this.getMostSignificantDigit() == otherNum.getMostSignificantDigit()){
+                this.iter.gotoMostSignificantDigit();
+                otherNum.iter.gotoMostSignificantDigit();
+                while (this.iter.current() == otherNum.iter.current()){
+                    if (this.iter.hasPrevious() && otherNum.iter.hasPrevious()){
+                        this.iter.previous();
+                        otherNum.iter.previous();
+                    }
+                    else {return 0;}
+                }
+                return (this.iter.current() > otherNum.iter.current()) ? 1 : -1;
+            }
+            else {return (this.getMostSignificantDigit() > otherNum.getMostSignificantDigit()) ? 1 : -1;}
+        }
+        else {return (this.biggestDecimalPlace > otherNum.biggestDecimalPlace) ? 1 : -1;}
+    }
+
     //<<<<<<<<<<<<<<<<<<<<<< Utility Classes Below >>>>>>>>>>>>>>>>>>>>>>>
     
     private class Node {
@@ -157,7 +240,7 @@ public class LinkedLargeInteger implements LargeInteger{
         }
         
         private boolean hasPrevious(){
-            return this.currentDecimalPlace.previous != null;
+            return this.currentDecimalIndex > 0 && this.currentDecimalPlace.previous != null;
         }
         
         private Integer next(){
@@ -209,18 +292,18 @@ public class LinkedLargeInteger implements LargeInteger{
         }
         
         private LargeIntegerBuilder(LinkedLargeInteger largeInt){
-        largeInt.iter.gotoLeastSignificantDigit();
-        //Initialize the first two
-        this.sign = new Node(largeInt.sign.data, null, new Node(largeInt.iter.current(), this.sign));
-        this.mostSignificantDigit = this.sign.next;
-        this.biggestDecimalPlace = 0;
-        this.iter = new IntegerIterator();
-        while (largeInt.iter.hasNext()){
-            this.iter.currentDecimalPlace.next = new Node(largeInt.iter.next(), this.iter.currentDecimalPlace);
-            this.iter.next();
-            this.mostSignificantDigit = this.iter.currentDecimalPlace;
-            this.biggestDecimalPlace++; 
-        }
+            largeInt.iter.gotoLeastSignificantDigit();
+            //Initialize the first two
+            this.sign = new Node(largeInt.sign.data, null, new Node(largeInt.iter.current(), this.sign));
+            this.mostSignificantDigit = this.sign.next;
+            this.biggestDecimalPlace = 0;
+            this.iter = new IntegerIterator();
+            while (largeInt.iter.hasNext()){
+                this.iter.currentDecimalPlace.next = new Node(largeInt.iter.next(), this.iter.currentDecimalPlace);
+                this.iter.next();
+                this.mostSignificantDigit = this.iter.currentDecimalPlace;
+                this.biggestDecimalPlace++; 
+            }
         }
         
         private boolean setDigitAtDecimalPlace(Integer digit, int decimalPlace){
@@ -241,13 +324,40 @@ public class LinkedLargeInteger implements LargeInteger{
             }
             if (decimalPlace == this.iter.currentDecimalIndex){
                 if (decimalPlace > this.biggestDecimalPlace){
-                    this.biggestDecimalPlace = decimalPlace;
+                    this.biggestDecimalPlace = this.iter.currentDecimalIndex;
                     this.mostSignificantDigit = this.iter.currentDecimalPlace;
+                }
+                if (decimalPlace == this.biggestDecimalPlace && digit == 0){
+                    this.iter.gotoMostSignificantDigit();
+                    this.iter.previous();
+                    while(this.iter.current() == 0 && this.iter.currentDecimalIndex > 0){
+                        this.iter.previous();
+                    }
+                    if (this.iter.currentDecimalIndex == 0){
+                        this.clear();
+                        return true;
+                    }
+                    this.mostSignificantDigit = this.iter.currentDecimalPlace;
+                    this.mostSignificantDigit.next = null;
+                    this.biggestDecimalPlace = this.iter.currentDecimalIndex;
+                    this.iter.currentDecimalPlace.data = digit;
+                    return true;
                 }
                 this.iter.currentDecimalPlace.data = digit;
                 return true;
             }
             else {return false;}//Number not set for unknown reason    
+        }
+        
+        private void addToDecimalPlace(int decimalPlace, Integer numberToAdd){
+            if (numberToAdd < 0){ throw new IllegalArgumentException("Number should be positive: " + numberToAdd); }
+            if (decimalPlace < 0){ throw new IllegalArgumentException("Digit should be greater than or equal to zero: " + decimalPlace); }
+            if (decimalPlace == 0){return;}//valid but does nothing.
+            numberToAdd += this.getIntegerAtDecimalPlace(decimalPlace);
+            this.setDigitAtDecimalPlace(numberToAdd % 10, decimalPlace);
+            if (numberToAdd >= 10){
+                this.addToDecimalPlace(decimalPlace + 1, numberToAdd / 10);
+            }
         }
         
         private void setSign(int signedNumber){
@@ -262,11 +372,12 @@ public class LinkedLargeInteger implements LargeInteger{
             this.sign = new Node(0, null, new Node(0, this.sign));
             this.mostSignificantDigit = this.sign.next;
             this.biggestDecimalPlace = 0;
+            this.iter = new IntegerIterator();
         }
         
-        private LinkedLargeInteger copy(){
+        /*private LinkedLargeInteger copy(){
             return new LinkedLargeInteger(this);
-        }
+        }*/
     }
     
     
