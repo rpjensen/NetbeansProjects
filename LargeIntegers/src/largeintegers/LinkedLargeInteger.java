@@ -44,21 +44,6 @@ public class LinkedLargeInteger implements LargeInteger{
         this.iter = new IntegerIterator();
     }
     
-   /* private LinkedLargeInteger(LargeIntegerBuilder builder){
-        builder.iter.gotoLeastSignificantDigit();
-        //Initialize the first two
-        this.sign = new Node(builder.sign.data, null, new Node(builder.iter.current(), this.sign));
-        this.mostSignificantDigit = this.sign.next;
-        this.biggestDecimalPlace = 0;
-        this.iter = new IntegerIterator();
-        while (builder.iter.hasNext()){
-            this.iter.currentDecimalPlace.next = new Node(builder.iter.next(), this.iter.currentDecimalPlace);
-            this.iter.next();
-            this.mostSignificantDigit = this.iter.currentDecimalPlace;
-            this.biggestDecimalPlace++; 
-        }
-    }*/
-    
     private LinkedLargeInteger(LinkedLargeInteger builder){
         builder.iter.gotoLeastSignificantDigit();
         //Initialize the first two
@@ -89,7 +74,7 @@ public class LinkedLargeInteger implements LargeInteger{
         if (this.isZero() || otherNum.isZero()){return this.isZero() ? otherNum.copy() : this.copy();}
         if (this.getSign() != otherNum.getSign()){return this.subtract(otherNum.negate());}
         else {
-            LargeIntegerBuilder sum = this.addMagnatudes(otherNum);
+            LargeIntegerBuilder sum = this.addMagnitudes(otherNum);
             if (this.getSign() > 0){sum.setSign(1);}
             else {sum.setSign(-1);}
             return sum.copy();
@@ -98,7 +83,24 @@ public class LinkedLargeInteger implements LargeInteger{
     
     @Override
     public LinkedLargeInteger subtract(LinkedLargeInteger otherNum){
-        
+        if (this.isZero() || otherNum.isZero()){return this.isZero() ? otherNum.copy() : this.copy();}
+        if (this.getSign() != otherNum.getSign()){return this.add(otherNum.negate());}
+        else {
+            LargeIntegerBuilder dif = this.subMagnitudes(otherNum);
+            if (dif.isZero()){
+                return new LinkedLargeInteger(0);
+            }
+            if (this.getSign() > 1){ 
+                if (this.largerMagnitude(otherNum) > 0){dif.setSign(1);}
+                else {dif.setSign(-1);} 
+            }
+            else {
+                if (this.largerMagnitude(otherNum) > 0){dif.setSign(-1);}
+                else {dif.setSign(1);
+                }
+            }
+            return dif.copy();
+        }
     }
     public Integer getIntegerAtDecimalPlace(int decimalPlace){
         if (decimalPlace < 0){
@@ -167,13 +169,47 @@ public class LinkedLargeInteger implements LargeInteger{
         return new LargeIntegerBuilder(this);
     }
     
-    private LargeIntegerBuilder addMagnatudes(LinkedLargeInteger otherNum){
+    private LargeIntegerBuilder addMagnitudes(LinkedLargeInteger otherNum){
         LargeIntegerBuilder sum = new LargeIntegerBuilder();
         int maxDecimalPlace = Math.max(this.biggestDecimalPlace, otherNum.biggestDecimalPlace);
         for (int i = 0; i < maxDecimalPlace; i++){
             sum.addToDecimalPlace(i, this.getIntegerAtDecimalPlace(i) + otherNum.getIntegerAtDecimalPlace(maxDecimalPlace));
         }
         return sum;
+    }
+    
+    private LargeIntegerBuilder subMagnitudes(LinkedLargeInteger otherNum){
+        if (this.largerMagnitude(otherNum) == 0){return new LargeIntegerBuilder();}
+        if (this.isZero() || otherNum.isZero()){
+            LargeIntegerBuilder returnValue = null;
+            if (this.isZero()){
+                returnValue = otherNum.mutableCopy();
+            }else {
+                returnValue = this.mutableCopy();
+            }
+            returnValue.setSign(1);
+            return returnValue;
+        }
+        LargeIntegerBuilder biggerNumber = null;
+        LinkedLargeInteger smallerNumber = null;
+        if (this.largerMagnitude(otherNum) > 0){
+            biggerNumber = this.mutableCopy();
+            smallerNumber = otherNum;
+        }
+        else {
+            biggerNumber = otherNum.mutableCopy();
+            smallerNumber = this;
+        }
+        
+        for (int i = 0; i <= smallerNumber.biggestDecimalPlace; i++){
+            int result = biggerNumber.getIntegerAtDecimalPlace(i) - smallerNumber.getIntegerAtDecimalPlace(i);
+            if (result < 0){
+                result += 10;
+                biggerNumber.borrowFromNextDecimalPlace(i);
+            }
+        }
+        biggerNumber.setSign(1);
+        return biggerNumber;
     }
     
     private int largerMagnitude(LinkedLargeInteger otherNum){
@@ -310,53 +346,86 @@ public class LinkedLargeInteger implements LargeInteger{
             if (!(decimalPlace >= 0)){
                 throw new IllegalArgumentException("Decimal places are greater than or equal to zero: " + decimalPlace);
             }
+            if (digit > 9 || digit < 0){
+                throw new IllegalArgumentException("Digits are positive numbers between zero and nine: " + digit);
+            }
+            boolean shouldUpdateSigDigit = false;
+            boolean shouldTrimZeros = false;
             while (decimalPlace > this.iter.currentDecimalIndex){
                 if (!this.iter.hasNext()){
                     if (digit == 0){return true;}//No need extending the number since they will all be leading zeros
                     this.iter.currentDecimalPlace.next = new Node(0, this.iter.currentDecimalPlace);
+                    shouldUpdateSigDigit = true;
                 }
                 this.iter.next();
             }
-            while (decimalPlace < this.iter.currentDecimalIndex){
-                if (this.iter.currentDecimalIndex >  0){
-                    this.iter.previous();
-                }
+            while (decimalPlace < this.iter.currentDecimalIndex && this.iter.hasPrevious()){
+                this.iter.previous();
             }
             if (decimalPlace == this.iter.currentDecimalIndex){
-                if (decimalPlace > this.biggestDecimalPlace){
-                    this.biggestDecimalPlace = this.iter.currentDecimalIndex;
-                    this.mostSignificantDigit = this.iter.currentDecimalPlace;
-                }
                 if (decimalPlace == this.biggestDecimalPlace && digit == 0){
-                    this.iter.gotoMostSignificantDigit();
-                    this.iter.previous();
-                    while(this.iter.current() == 0 && this.iter.currentDecimalIndex > 0){
-                        this.iter.previous();
-                    }
-                    if (this.iter.currentDecimalIndex == 0){
-                        this.clear();
-                        return true;
-                    }
-                    this.mostSignificantDigit = this.iter.currentDecimalPlace;
-                    this.mostSignificantDigit.next = null;
-                    this.biggestDecimalPlace = this.iter.currentDecimalIndex;
-                    this.iter.currentDecimalPlace.data = digit;
-                    return true;
+                    shouldTrimZeros = true;
+                }
+                if (this.isZero() && digit == 0){
+                    this.setSign(1);
                 }
                 this.iter.currentDecimalPlace.data = digit;
+                if (shouldUpdateSigDigit){this.updateMostSigDigit();}
+                if (shouldTrimZeros){this.trimLeadingZeros();}
                 return true;
             }
             else {return false;}//Number not set for unknown reason    
         }
         
-        private void addToDecimalPlace(int decimalPlace, Integer numberToAdd){
+        private void trimLeadingZeros(){
+            this.iter.gotoMostSignificantDigit();
+            while (this.iter.current() == 0 && this.iter.hasPrevious()){
+                this.iter.previous();
+            }
+            if (this.iter.currentDecimalIndex == 0 && this.iter.current() == 0){
+                this.clear();
+                return;
+            }
+            this.mostSignificantDigit = this.iter.currentDecimalPlace;
+            this.mostSignificantDigit.next = null;
+            this.biggestDecimalPlace = this.iter.currentDecimalIndex;
+        }
+        
+        private void updateMostSigDigit(){
+            this.iter.gotoMostSignificantDigit();
+            while (this.iter.hasNext()){
+                this.iter.next();
+            }
+            if (this.iter.currentDecimalPlace != this.mostSignificantDigit){
+                this.mostSignificantDigit = this.iter.currentDecimalPlace;
+                this.biggestDecimalPlace = this.iter.currentDecimalIndex;
+            }
+        }
+        
+        private void addToDecimalPlace(Integer numberToAdd, int decimalPlace){
             if (numberToAdd < 0){ throw new IllegalArgumentException("Number should be positive: " + numberToAdd); }
             if (decimalPlace < 0){ throw new IllegalArgumentException("Digit should be greater than or equal to zero: " + decimalPlace); }
-            if (decimalPlace == 0){return;}//valid but does nothing.
+            if (numberToAdd == 0){return;}//valid but does nothing.
             numberToAdd += this.getIntegerAtDecimalPlace(decimalPlace);
             this.setDigitAtDecimalPlace(numberToAdd % 10, decimalPlace);
             if (numberToAdd >= 10){
-                this.addToDecimalPlace(decimalPlace + 1, numberToAdd / 10);
+                this.addToDecimalPlace(numberToAdd / 10, decimalPlace + 1);
+            }
+        }
+        
+        private void borrowFromNextDecimalPlace(int decimalPlace){
+            if (decimalPlace >= this.biggestDecimalPlace){throw new IllegalArgumentException("No decimal place to borrow from: " + decimalPlace);}
+            if (decimalPlace < 0){throw new IllegalArgumentException("Decimal places are greater than or equal to zero: " + decimalPlace);}
+            if (this.getIntegerAtDecimalPlace(decimalPlace + 1) == 0){
+                this.borrowFromNextDecimalPlace(decimalPlace + 1);
+                this.setDigitAtDecimalPlace(9, decimalPlace + 1);
+                return;
+            }
+            boolean shouldTrimZeros = false;
+            if (this.getIntegerAtDecimalPlace(decimalPlace + 1) == 1){shouldTrimZeros = true;}
+            this.setDigitAtDecimalPlace(this.getIntegerAtDecimalPlace(decimalPlace + 1) - 1, decimalPlace + 1);
+            if (shouldTrimZeros){
+                this.trimLeadingZeros();
             }
         }
         
@@ -375,9 +444,6 @@ public class LinkedLargeInteger implements LargeInteger{
             this.iter = new IntegerIterator();
         }
         
-        /*private LinkedLargeInteger copy(){
-            return new LinkedLargeInteger(this);
-        }*/
     }
     
     
