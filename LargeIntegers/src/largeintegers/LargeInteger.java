@@ -4,7 +4,7 @@ package largeintegers;
 /**
  *
  * @author Ryan Jensen
- * @version April 7, 2014
+ * @version April 28, 2014
  */
 public interface LargeInteger {
     public int compareTo(LinkedLargeInteger otherNum);
@@ -12,6 +12,7 @@ public interface LargeInteger {
     public boolean equals(Object object);
     @Override
     public String toString();
+    public boolean isNegative();
     public LinkedLargeInteger negate();
     public LinkedLargeInteger add(LinkedLargeInteger otherNum);
     public LinkedLargeInteger subtract(LinkedLargeInteger otherNum);
