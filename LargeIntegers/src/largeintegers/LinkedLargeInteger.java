@@ -63,7 +63,7 @@ public class LinkedLargeInteger {//implements LargeInteger{
         this.mostSignificantDigit = this.sign;
         
         do{
-            this.mostSignificantDigit.next = new Node((int)(number % 10), this.mostSignificantDigit);
+            this.mostSignificantDigit.next = new Node((int)Math.abs(number % 10), this.mostSignificantDigit);
             //new value is the ones digit of the current number
             number = number / 10;//throw away the ones digit for next iteration
             this.mostSignificantDigit = this.mostSignificantDigit.next;
@@ -232,6 +232,28 @@ public class LinkedLargeInteger {//implements LargeInteger{
     }
     
     /**
+     * Returns a new Large Integer equal to the caller to the power of other number.
+     * Pre-Condition: other number should be greater than or equal to zero
+     * @param otherNum the power to raise the caller to
+     * @return the caller to the power of other number
+     * @throws IllegalArgumentException if other number is negative
+     */
+    public LinkedLargeInteger pow(LinkedLargeInteger otherNum){
+        if (otherNum.compareTo(new LinkedLargeInteger(0)) < 0){
+            throw new IllegalArgumentException("Cannot use negative exponents" + otherNum);
+        }
+        if (otherNum.isZero()){return new LinkedLargeInteger(1);}
+        if (otherNum.compareTo(new LinkedLargeInteger(1)) == 0){return this.copy();}
+        else {
+            LinkedLargeInteger halfPow = this.pow(otherNum.dividedBy(2));
+            return halfPow.multiply(halfPow);
+        }
+    }
+    
+    public LinkedLargeInteger pow(long otherNum){
+        if (otherNum < 0){}
+    }
+    /**
      * Returns the integer digit for a given decimal place. The zeroth decimal place
      * represents the one's place and the first decimal place represents the ten's
      * place and so on.
@@ -321,6 +343,16 @@ public class LinkedLargeInteger {//implements LargeInteger{
     }
     
     /**
+     * Convenience method that converts other number into a Large Integer so see
+     * compareTo(LinkedLargeInteger otherNum) for more details.
+     * @param otherNum the number to compare against
+     * @return 1,-1, or 0 if caller is greater than, less than, or equal respectively
+     */
+    public int compareTo(long otherNum){
+        return this.compareTo(new LinkedLargeInteger(otherNum));
+    }
+    
+    /**
      * Compares two Large Integers in absolute value. Returns 1,-1 or 0 if the caller
      * is larger, smaller, or equal to other number respectively in magnitude. 
      * @param otherNum the number to be compared against
@@ -330,6 +362,15 @@ public class LinkedLargeInteger {//implements LargeInteger{
         return this.largerMagnitude(otherNum);
     }
     
+    /**
+     * Convenience method that converts other number into a Large Integer so see
+     * absCompare(LinkedLargeInteger otherNum) for details
+     * @param otherNum the number to compare against
+     * @return 1,-1, or 0 if the caller is greater,smaller, or equal in abs to other number
+     */
+    public int absCompare(long otherNum){
+        return this.absCompare(new LinkedLargeInteger(otherNum));
+    }
     /**
      * Tests the equality against another object.  Two Large Integers are considered
      * equal if they have the same sign and value.

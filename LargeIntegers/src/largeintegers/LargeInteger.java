@@ -13,7 +13,7 @@ public interface LargeInteger {
     @Override
     public String toString();
     public boolean isNegative();
-    public LinkedLargeInteger negate();
+    public LargeInteger negate();
     public LinkedLargeInteger add(LinkedLargeInteger otherNum);
     public LinkedLargeInteger subtract(LinkedLargeInteger otherNum);
     public LinkedLargeInteger multiply(LinkedLargeInteger otherNum);
