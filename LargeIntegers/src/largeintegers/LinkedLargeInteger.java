@@ -25,7 +25,7 @@ public class LinkedLargeInteger {//implements LargeInteger{
     
     protected Node sign;
     protected Node mostSignificantDigit;
-    protected int biggestDecimalPlace;
+    protected long biggestDecimalPlace;
     protected IntegerIterator iter;
     
     /**
@@ -239,19 +239,46 @@ public class LinkedLargeInteger {//implements LargeInteger{
      * @throws IllegalArgumentException if other number is negative
      */
     public LinkedLargeInteger pow(LinkedLargeInteger otherNum){
-        if (otherNum.compareTo(new LinkedLargeInteger(0)) < 0){
+        if (otherNum.compareTo(0) < 0){
             throw new IllegalArgumentException("Cannot use negative exponents" + otherNum);
         }
+        if (this.isZero()){return new LinkedLargeInteger(0);}
         if (otherNum.isZero()){return new LinkedLargeInteger(1);}
-        if (otherNum.compareTo(new LinkedLargeInteger(1)) == 0){return this.copy();}
+        if (otherNum.compareTo(1) == 0){return this.copy();}
         else {
-            LinkedLargeInteger halfPow = this.pow(otherNum.dividedBy(2));
-            return halfPow.multiply(halfPow);
+            LargeIntegerBuilder product = this.mutableCopy();
+            if (canUseLong(otherNum)){
+                long otherNumLong = otherNum.toLong();
+                for (int i = 2; i <= otherNumLong; i++){
+                    product = this.multiplyMagnitudes(product);
+                }
+            }
+            else {
+                LargeIntegerBuilder iterator = new LargeIntegerBuilder(2);
+                while (iterator.compareTo(otherNum) <= 0){
+                    product = this.multiplyMagnitudes(product);
+                }
+            }
+            
+            if (otherNum.isOdd() && this.sign.data < 0){
+                product.setSign(-1);
+            }
+            return product.copy();
         }
     }
     
+    /**
+     * Convenience method that converts other number to a Large Integer so see
+     * pow(LinkedLargeInteger otherNum) for more information.
+     * @param otherNum the number to raise the caller to
+     * @return the caller raised to the power of otherNum
+     * @throws IllegalArgumentException if otherNum is negative
+     */
     public LinkedLargeInteger pow(long otherNum){
-        if (otherNum < 0){}
+        if (otherNum < 0){throw new IllegalArgumentException("Cannot use negative exponents" + otherNum);}
+        if (otherNum == 0){return new LinkedLargeInteger(1);}
+        if (otherNum == 1){return this.copy();}
+        return this.pow(new LinkedLargeInteger(otherNum));
     }
     /**
      * Returns the integer digit for a given decimal place. The zeroth decimal place
@@ -262,7 +289,7 @@ public class LinkedLargeInteger {//implements LargeInteger{
      * @return the integer value stored at that decimal place
      * @throws IllegalArgumentException if the decimal place is less than 0
      */
-    public Integer getIntegerAtDecimalPlace(int decimalPlace){
+    public Integer getIntegerAtDecimalPlace(long decimalPlace){
         if (decimalPlace < 0){
             throw new IllegalArgumentException("Decimal Places are greater than or equal to zero " + decimalPlace);
         }
@@ -294,7 +321,7 @@ public class LinkedLargeInteger {//implements LargeInteger{
     /**
      * @return the decimal place of the most significant digit
      */
-    public int getMostSignificantDigitIndex(){
+    public long getMostSignificantDigitIndex(){
         return this.biggestDecimalPlace;
     }
     
@@ -312,6 +339,20 @@ public class LinkedLargeInteger {//implements LargeInteger{
         return this.mostSignificantDigit == this.sign.next && this.mostSignificantDigit.data == 0;
     }
     
+    /**
+     * @return true if the caller is even
+     */
+    public boolean isEven(){
+        return this.getIntegerAtDecimalPlace(0) % 2 == 0;
+    }
+    
+    /**
+     * @return true if the caller is odd
+     */
+    public boolean isOdd(){
+        return this.getIntegerAtDecimalPlace(0) % 2 == 1;
+    }
+     
     /**
      * @return a new Large Integer which is the absolute value of the caller
      */
@@ -395,7 +436,7 @@ public class LinkedLargeInteger {//implements LargeInteger{
         if (this.isZero()){return "0";}
         StringBuilder string = new StringBuilder();
         if (this.getSign() < 0){string.append("-");}
-        for (int i = this.biggestDecimalPlace; i >= 0; i--){
+        for (long i = this.biggestDecimalPlace; i >= 0; i--){
             string.append(this.getIntegerAtDecimalPlace(i));
             if (i % 3 == 0 && i != 0){string.append(",");}
         }
@@ -434,7 +475,7 @@ public class LinkedLargeInteger {//implements LargeInteger{
         }
         long result = this.getSign() * this.sign.next.data;
         long power = 10;
-        for (int i = 1; i <= this.biggestDecimalPlace; i++){
+        for (long i = 1; i <= this.biggestDecimalPlace; i++){
             result += this.getIntegerAtDecimalPlace(i) * power;
             power *= 10;
         }
@@ -460,8 +501,8 @@ public class LinkedLargeInteger {//implements LargeInteger{
      */
     private LargeIntegerBuilder addMagnitudes(LinkedLargeInteger otherNum){
         LargeIntegerBuilder sum = new LargeIntegerBuilder();
-        int maxDecimalPlace = Math.max(this.biggestDecimalPlace, otherNum.biggestDecimalPlace);
-        for (int i = 0; i <= maxDecimalPlace; i++){
+        long maxDecimalPlace = Math.max(this.biggestDecimalPlace, otherNum.biggestDecimalPlace);
+        for (long i = 0; i <= maxDecimalPlace; i++){
             sum.addToDecimalPlace(this.getIntegerAtDecimalPlace(i) + otherNum.getIntegerAtDecimalPlace(i), i);
         }
         return sum;
@@ -497,7 +538,7 @@ public class LinkedLargeInteger {//implements LargeInteger{
             smallerNumber = this;
         }
         
-        for (int i = 0; i <= smallerNumber.biggestDecimalPlace; i++){
+        for (long i = 0; i <= smallerNumber.biggestDecimalPlace; i++){
             int result = biggerNumber.getIntegerAtDecimalPlace(i) - smallerNumber.getIntegerAtDecimalPlace(i);
             if (result < 0){
                 result += 10;
@@ -517,8 +558,8 @@ public class LinkedLargeInteger {//implements LargeInteger{
      */
     private LargeIntegerBuilder multiplyMagnitudes(LinkedLargeInteger otherNum){
         LargeIntegerBuilder product = new LargeIntegerBuilder();
-        for (int i = 0; i <= this.biggestDecimalPlace; i++){
-            for (int j = 0; j <= otherNum.biggestDecimalPlace; j++){
+        for (long i = 0; i <= this.biggestDecimalPlace; i++){
+            for (long j = 0; j <= otherNum.biggestDecimalPlace; j++){
                 product.addToDecimalPlace(this.getIntegerAtDecimalPlace(i) * otherNum.getIntegerAtDecimalPlace(j), i + j);
             }
         }
@@ -542,7 +583,7 @@ public class LinkedLargeInteger {//implements LargeInteger{
             LargeIntegerBuilder quotient = new LargeIntegerBuilder();
             long otherNumLong = otherNum.absoluteValue().toLong();
             long workingNumber = 0;
-            for (int i = this.biggestDecimalPlace; i >= 0; i--){
+            for (long i = this.biggestDecimalPlace; i >= 0; i--){
                 workingNumber *= 10;
                 workingNumber += this.getIntegerAtDecimalPlace(i);
                 int result = (int)(workingNumber / otherNumLong);//this number is less than 10 by design
@@ -571,7 +612,7 @@ public class LinkedLargeInteger {//implements LargeInteger{
         LinkedLargeInteger posOtherNum = otherNum.absoluteValue();
         LargeIntegerBuilder quotient = new LargeIntegerBuilder();
         LargeIntegerBuilder workingNumber = new LargeIntegerBuilder();
-        for (int i = this.biggestDecimalPlace; i >= 0; i--){
+        for (long i = this.biggestDecimalPlace; i >= 0; i--){
             workingNumber.multiplyByTen();
             workingNumber.setDigitAtDecimalPlace(this.getIntegerAtDecimalPlace(i), 0);
             int result = 0;
@@ -667,7 +708,7 @@ public class LinkedLargeInteger {//implements LargeInteger{
      */
     protected class IntegerIterator{
         private Node currentDecimalPlace;
-        private int currentDecimalIndex;
+        private long currentDecimalIndex;
         
         /**
          * Initialize a new iterator that starts at decimal place 0
@@ -785,6 +826,10 @@ public class LinkedLargeInteger {//implements LargeInteger{
             
         }
         
+        private LargeIntegerBuilder(long num){
+            super(num);
+        }
+        
         /**
          * Initialize a new mutable large integer equal to the value of the 
          * large integer passed.
@@ -818,7 +863,7 @@ public class LinkedLargeInteger {//implements LargeInteger{
          * @throws IllegalArgumentException if the decimal place is less than zero or
          * if the digit is less than zero or greater than 9.
          */
-        private boolean setDigitAtDecimalPlace(int digit, int decimalPlace){
+        private boolean setDigitAtDecimalPlace(int digit, long decimalPlace){
             if (!(decimalPlace >= 0)){
                 throw new IllegalArgumentException("Decimal places are greater than or equal to zero: " + decimalPlace);
             }
@@ -910,12 +955,12 @@ public class LinkedLargeInteger {//implements LargeInteger{
          * @throws IllegalArgumentException if the number to add is less than 0 or
          * if the decimal place is less than zero
          */
-        private void addToDecimalPlace(int numberToAdd, int decimalPlace){
+        private void addToDecimalPlace(long numberToAdd, long decimalPlace){
             if (numberToAdd < 0){ throw new IllegalArgumentException("Number should be positive: " + numberToAdd); }
             if (decimalPlace < 0){ throw new IllegalArgumentException("Digit should be greater than or equal to zero: " + decimalPlace); }
             if (numberToAdd == 0){return;}//valid but does nothing.
             numberToAdd += this.getIntegerAtDecimalPlace(decimalPlace);
-            this.setDigitAtDecimalPlace(numberToAdd % 10, decimalPlace);
+            this.setDigitAtDecimalPlace((int)(numberToAdd % 10), decimalPlace);
             if (numberToAdd >= 10){
                 this.addToDecimalPlace(numberToAdd / 10, decimalPlace + 1);
             }
@@ -931,7 +976,7 @@ public class LinkedLargeInteger {//implements LargeInteger{
          * @throws IllegalArgumentException if the decimal place is greater than or equal
          * to the highest decimal place or less than 0
          */
-        private void borrowFromNextDecimalPlace(int decimalPlace){
+        private void borrowFromNextDecimalPlace(long decimalPlace){
             if (decimalPlace >= this.biggestDecimalPlace){throw new IllegalArgumentException("No decimal place to borrow from: " + decimalPlace);}
             if (decimalPlace < 0){throw new IllegalArgumentException("Decimal places are greater than or equal to zero: " + decimalPlace);}
             if (this.getIntegerAtDecimalPlace(decimalPlace + 1) == 0){
