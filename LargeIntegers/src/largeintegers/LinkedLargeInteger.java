@@ -12,7 +12,7 @@ import java.util.Scanner;
  * @author Ryan Jensen
  * @version Apr 28, 2014
  */
-public class LinkedLargeInteger {//implements LargeInteger{
+public class LinkedLargeInteger implements LargeInteger{
     private static final LinkedLargeInteger MAX_LONG;
     private static final LinkedLargeInteger MIN_LONG;
     
@@ -296,6 +296,39 @@ public class LinkedLargeInteger {//implements LargeInteger{
         return this.dividedBy(new LinkedLargeInteger(otherNum));
     }
     
+    @Override
+    public LinkedLargeInteger remainder(LinkedLargeInteger otherNum){
+        if (otherNum.isZero()){throw new IllegalArgumentException("Divide by zero exception");}
+        if (this.isZero()){return new LinkedLargeInteger(0);}
+        else{
+            return this.subtract(this.dividedBy(otherNum).multiply(otherNum));    
+        }
+    }
+    
+    public LinkedLargeInteger remaineder(long otherNum){
+        return this.remainder(new LinkedLargeInteger(otherNum));
+    }
+    
+    @Override
+    public LinkedLargeInteger modulo(LinkedLargeInteger otherNum){
+        if (otherNum.isZero()){throw new IllegalArgumentException("Division by zero exception");}
+        if (this.isZero()){return new LinkedLargeInteger(0);}
+        else{
+            if (this.compareTo(0) > 0){
+                if (otherNum.compareTo(0) > 0){return this.remainder(otherNum);}
+                else {return this.remainder(otherNum).add(otherNum);}
+            }
+            else {
+                if (otherNum.compareTo(0) > 0){return this.remainder(otherNum).add(otherNum);}
+                else {return this.remainder(otherNum);}
+            }
+        }
+    }
+    
+    public LargeInteger modulo(long otherNum){
+        return this.modulo(new LinkedLargeInteger(otherNum));
+    }
+    
     /**
      * Returns a new Large Integer equal to the caller to the power of other number.
      * Pre-Condition: other number should be greater than or equal to zero
@@ -405,6 +438,10 @@ public class LinkedLargeInteger {//implements LargeInteger{
         return this.mostSignificantDigit == this.sign.next && this.mostSignificantDigit.data == 0;
     }
     
+    @Override
+    public boolean isNegative(){
+        return this.getSign() == -1;
+    }
     /**
      * @return true if the caller is even
      */

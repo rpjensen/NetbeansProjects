@@ -48,10 +48,70 @@ public class LargeIntegersDriver {
         System.out.println(new LinkedLargeInteger("00000000"));
         System.out.println(new LinkedLargeInteger("00000000").biggestDecimalPlace);
         System.out.println(new LinkedLargeInteger("-00000000100000000"));
-        System.out.println(new LinkedLargeInteger("100000000").biggestDecimalPlace);
-        
+        System.out.println(new LinkedLargeInteger("+100000000").biggestDecimalPlace);
+        System.out.println(new LinkedLargeInteger("+100000000"));
+        try {
+            System.out.println(new LinkedLargeInteger(",00,100"));
+        }
+        catch (IllegalArgumentException e){
+            System.out.println("Caught: " + e.getMessage());
+        }
+        try {
+            System.out.println(new LinkedLargeInteger("-,00,100"));
+        }
+        catch (IllegalArgumentException e){
+            System.out.println("Caught: " + e.getMessage());
+        }
+        try {
+            System.out.println(new LinkedLargeInteger("+00,100"));
+        }
+        catch (IllegalArgumentException e){
+            System.out.println("Caught: " + e.getMessage());
+        }
+        try {
+            System.out.println(new LinkedLargeInteger("jfda;"));
+        }
+        catch (IllegalArgumentException e){
+            System.out.println("Caught: " + e.getMessage());
+        }
+        try {
+            System.out.println(new LinkedLargeInteger("474329874234j4323238"));
+        }
+        catch (IllegalArgumentException e){
+            System.out.println("Caught: " + e.getMessage());
+        }
         System.out.println((new LinkedLargeInteger(1000000).toString()));
         System.out.println((new LinkedLargeInteger(-1000000).toString()));
-        
+        System.out.println(12 % 7);
+        System.out.println(12 % -7);
+        System.out.println(-12 % -7);
+        System.out.println(-12 % 7);
+        System.out.println(2 % 3);
+        System.out.println(2 % -3);
+        System.out.println(-2 % 3);
+        System.out.println(-2 % -3);
+        System.out.println();
+        System.out.println(23 % 11);
+        System.out.println(23 % -11);
+        System.out.println(-23 % 11);
+        System.out.println(-23 % -11);
+        System.out.println();
+        System.out.println((new LinkedLargeInteger(23).remaineder(11)));
+        System.out.println((new LinkedLargeInteger(23).remaineder(-11)));
+        System.out.println((new LinkedLargeInteger(-23).remaineder(11)));
+        System.out.println((new LinkedLargeInteger(-23).remaineder(-11)));
+        System.out.println((new LinkedLargeInteger(23).modulo(11)));
+        System.out.println((new LinkedLargeInteger(23).modulo(-11)));
+        System.out.println((new LinkedLargeInteger(-23).modulo(11)));
+        System.out.println((new LinkedLargeInteger(-23).modulo(-11)));
+        System.out.println();
+        System.out.println((new LinkedLargeInteger(2).remaineder(3)));
+        System.out.println((new LinkedLargeInteger(2).remaineder(-3)));
+        System.out.println((new LinkedLargeInteger(-2).remaineder(3)));
+        System.out.println((new LinkedLargeInteger(-2).remaineder(-3)));
+        System.out.println((new LinkedLargeInteger(2).modulo(3)));
+        System.out.println((new LinkedLargeInteger(2).modulo(-3)));
+        System.out.println((new LinkedLargeInteger(-2).modulo(3)));
+        System.out.println((new LinkedLargeInteger(-2).modulo(-3)));
     }
 }

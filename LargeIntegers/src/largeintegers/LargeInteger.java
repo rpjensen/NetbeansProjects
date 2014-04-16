@@ -13,13 +13,13 @@ public interface LargeInteger {
     @Override
     public String toString();
     public boolean isNegative();
-    public LargeInteger negate();
+    public LinkedLargeInteger negate();
     public LinkedLargeInteger add(LinkedLargeInteger otherNum);
     public LinkedLargeInteger subtract(LinkedLargeInteger otherNum);
     public LinkedLargeInteger multiply(LinkedLargeInteger otherNum);
-    public LinkedLargeInteger divide(LinkedLargeInteger otherNum);
+    public LinkedLargeInteger dividedBy(LinkedLargeInteger otherNum);
     public LinkedLargeInteger pow(LinkedLargeInteger otherNum);
     public LinkedLargeInteger remainder(LinkedLargeInteger otherNum);
-    public LinkedLargeInteger mod(LinkedLargeInteger otherNum);
+    public LinkedLargeInteger modulo(LinkedLargeInteger otherNum);
     
 }
