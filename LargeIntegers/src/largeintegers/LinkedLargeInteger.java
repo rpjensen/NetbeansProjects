@@ -3,10 +3,12 @@
 package largeintegers;
 
 import java.util.NoSuchElementException;
+import java.util.Scanner;
 
 /**
- * An arbitrary length integer that can do basic computations and arithmetic whose size
- * is only limited by your computer's memory.
+ * An arbitrary length integer that can do basic computations and arithmetic whose size is
+ * constrained either by your memory or by the upper limit of 2^63 - 1 decimal places
+ * or within the range {-10^(2^63-1),+10^(2^63-1)}
  * @author Ryan Jensen
  * @version Apr 28, 2014
  */
@@ -37,7 +39,70 @@ public class LinkedLargeInteger {//implements LargeInteger{
      * @throws IllegalArgumentException if the string cannot be parsed
      */
     public LinkedLargeInteger(String number){
-        this(Long.parseLong(number));
+        Scanner stringParser = new Scanner(number);
+        stringParser.useDelimiter("");
+        int iterator = -2;
+        while (stringParser.hasNext()){
+            String currentChar = stringParser.next();
+            if (iterator == -2){
+                if (!(Character.isDigit(currentChar.charAt(0)))){
+                    if (currentChar.equals("-")){
+                        this.sign = new Node(-1);
+                        iterator++;
+                    }
+                    else if (currentChar.equals("+")) {
+                        this.sign = new Node(1);
+                        iterator++;
+                    }
+                    else {throw new IllegalArgumentException("Illegal Character: " + currentChar);}
+                }
+                else {
+                    this.sign = new Node(1,null, new Node(Integer.parseInt(currentChar), this.sign));
+                    iterator = 0;
+                    this.mostSignificantDigit = this.sign.next;
+                }
+            }
+            else {
+                if (!(Character.isDigit(currentChar.charAt(0)))){
+                    if (!currentChar.equals(",")){
+                        throw new IllegalArgumentException("Error parsing character: " + currentChar);
+                    }
+                }
+                else {
+                    if (iterator == -1){
+                        this.sign.next = new Node(Integer.parseInt(currentChar), this.sign);
+                        this.mostSignificantDigit = this.sign.next;
+                    }
+                    else {
+                        Node tempNode = this.sign.next;
+                        this.sign.next = new Node(Integer.parseInt(currentChar), this.sign, tempNode);
+                        tempNode.previous = this.sign.next;
+                    }
+                    iterator++;
+                }
+            }
+        }
+        if (iterator >= 0){
+            this.biggestDecimalPlace = iterator ;
+        }
+        else {throw new IllegalArgumentException("Blank String exception");
+        }
+        this.iter = new IntegerIterator();
+        this.iter.gotoMostSignificantDigit();
+        while(iter.current() == 0 && iter.hasPrevious()){
+            iter.previous();
+            if (iter.current() == 0 && iter.currentDecimalIndex == 0){
+                this.sign = new Node(0,null, new Node(0, this.sign));
+                this.mostSignificantDigit = this.sign.next;
+                this.biggestDecimalPlace = 0;
+                this.iter.gotoLeastSignificantDigit();
+            }
+        }
+        if (iter.currentDecimalIndex != this.biggestDecimalPlace){
+            this.biggestDecimalPlace = iter.currentDecimalIndex;
+            this.mostSignificantDigit = iter.currentDecimalPlace;
+        }
+        
     }
     
     /**
@@ -257,6 +322,7 @@ public class LinkedLargeInteger {//implements LargeInteger{
                 LargeIntegerBuilder iterator = new LargeIntegerBuilder(2);
                 while (iterator.compareTo(otherNum) <= 0){
                     product = this.multiplyMagnitudes(product);
+                    iterator.addToDecimalPlace(1, 0);
                 }
             }
             

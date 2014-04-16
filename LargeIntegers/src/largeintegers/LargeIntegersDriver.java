@@ -41,5 +41,17 @@ public class LargeIntegersDriver {
         System.out.println((new LinkedLargeInteger(Long.MAX_VALUE)).pow(20));
         System.out.println((new LinkedLargeInteger(Long.MAX_VALUE)).pow(40));
         
+        System.out.println(new LinkedLargeInteger("3343473140982740981723407403921478"));
+        System.out.println(new LinkedLargeInteger("-3343473140982740981723407403921478"));
+        System.out.println(new LinkedLargeInteger("-0"));
+        System.out.println(new LinkedLargeInteger("0"));
+        System.out.println(new LinkedLargeInteger("00000000"));
+        System.out.println(new LinkedLargeInteger("00000000").biggestDecimalPlace);
+        System.out.println(new LinkedLargeInteger("-00000000100000000"));
+        System.out.println(new LinkedLargeInteger("100000000").biggestDecimalPlace);
+        
+        System.out.println((new LinkedLargeInteger(1000000).toString()));
+        System.out.println((new LinkedLargeInteger(-1000000).toString()));
+        
     }
 }
