@@ -15,7 +15,8 @@ public class LargeIntegersDriver {
         LinkedLargeInteger num = new LinkedLargeInteger(100000000);
         LinkedLargeInteger one = new LinkedLargeInteger(1);
         System.out.println(num);
-        LinkedLargeInteger num1 = num.add(num);
+        LargeInteger num1 = num.add(num);
+        System.out.println("Add, subtract, multiply,divide, power testing");
         System.out.println(num1);
         System.out.println(num.subtract(one));
         System.out.println(num.subtract(num));
@@ -40,6 +41,10 @@ public class LargeIntegersDriver {
         System.out.println((new LinkedLargeInteger(Long.MIN_VALUE).pow(3)));
         System.out.println((new LinkedLargeInteger(Long.MAX_VALUE)).pow(20));
         System.out.println((new LinkedLargeInteger(Long.MAX_VALUE)).pow(40));
+        
+        System.out.println();
+        System.out.println("String constructor testing");
+
         
         System.out.println(new LinkedLargeInteger("3343473140982740981723407403921478"));
         System.out.println(new LinkedLargeInteger("-3343473140982740981723407403921478"));
@@ -82,36 +87,22 @@ public class LargeIntegersDriver {
         }
         System.out.println((new LinkedLargeInteger(1000000).toString()));
         System.out.println((new LinkedLargeInteger(-1000000).toString()));
-        System.out.println(12 % 7);
-        System.out.println(12 % -7);
-        System.out.println(-12 % -7);
-        System.out.println(-12 % 7);
-        System.out.println(2 % 3);
-        System.out.println(2 % -3);
-        System.out.println(-2 % 3);
-        System.out.println(-2 % -3);
+        
         System.out.println();
-        System.out.println(23 % 11);
-        System.out.println(23 % -11);
-        System.out.println(-23 % 11);
-        System.out.println(-23 % -11);
+        System.out.println("23 remainder 11 cases: ++ +- -+ --");
+        
+        System.out.println((new LinkedLargeInteger(23).remainder(11)));
+        System.out.println((new LinkedLargeInteger(23).remainder(-11)));
+        System.out.println((new LinkedLargeInteger(-23).remainder(11)));
+        System.out.println((new LinkedLargeInteger(-23).remainder(-11)));
+        
         System.out.println();
-        System.out.println((new LinkedLargeInteger(23).remaineder(11)));
-        System.out.println((new LinkedLargeInteger(23).remaineder(-11)));
-        System.out.println((new LinkedLargeInteger(-23).remaineder(11)));
-        System.out.println((new LinkedLargeInteger(-23).remaineder(-11)));
+        System.out.println("23 mod 11 cases: ++ +- -+ --");
+
         System.out.println((new LinkedLargeInteger(23).modulo(11)));
         System.out.println((new LinkedLargeInteger(23).modulo(-11)));
         System.out.println((new LinkedLargeInteger(-23).modulo(11)));
         System.out.println((new LinkedLargeInteger(-23).modulo(-11)));
-        System.out.println();
-        System.out.println((new LinkedLargeInteger(2).remaineder(3)));
-        System.out.println((new LinkedLargeInteger(2).remaineder(-3)));
-        System.out.println((new LinkedLargeInteger(-2).remaineder(3)));
-        System.out.println((new LinkedLargeInteger(-2).remaineder(-3)));
-        System.out.println((new LinkedLargeInteger(2).modulo(3)));
-        System.out.println((new LinkedLargeInteger(2).modulo(-3)));
-        System.out.println((new LinkedLargeInteger(-2).modulo(3)));
-        System.out.println((new LinkedLargeInteger(-2).modulo(-3)));
+
     }
 }

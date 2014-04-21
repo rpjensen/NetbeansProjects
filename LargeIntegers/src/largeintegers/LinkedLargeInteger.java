@@ -168,8 +168,8 @@ public class LinkedLargeInteger implements LargeInteger{
      * Create and return a new large integer that is the negative of the caller.
      * @return the negative value of the caller
      */
-    //@Override
-    public LinkedLargeInteger negate(){
+    @Override
+    public LargeInteger negate(){
         LargeIntegerBuilder builder = this.mutableCopy();
         builder.setSign(-1 * builder.getSign());
         return builder.copy();
@@ -178,11 +178,13 @@ public class LinkedLargeInteger implements LargeInteger{
     /**
      * Create and return a new large integer that is the sum of the caller and the
      * other number passed into the method.
-     * @param otherNum the number to be added to the caller
+     * @param largeInt the number to be added to the caller
      * @return a new large integer that is the sum of the two
+     * @throws ClassCastException if largeInt isn't a LinkedLargeInteger
      */
-    //@Override
-    public LinkedLargeInteger add(LinkedLargeInteger otherNum){
+    @Override
+    public LargeInteger add(LargeInteger largeInt){
+        LinkedLargeInteger otherNum = (LinkedLargeInteger)largeInt;
         if (this.isZero() || otherNum.isZero()){return this.isZero() ? otherNum.copy() : this.copy();}
         if (this.getSign() != otherNum.getSign()){return this.subtract(otherNum.negate());}
         else {
@@ -195,22 +197,24 @@ public class LinkedLargeInteger implements LargeInteger{
     
     /**
      * Convenience method for adding a long to a Large Integer.  Immediately converts
-     * to Large Integer so see add(LinkedLargeInteger otherNum) for more info.
+     * to Large Integer so see add(LargeInteger largeInt) for more info.
      * @param otherNum the long to add
      * @return the sum of the two numbers as a Large Integer
      */
-    public LinkedLargeInteger add(long otherNum){
+    public LargeInteger add(long otherNum){
         return this.add(new LinkedLargeInteger(otherNum));
     }
     
     /**
      * Create and return a new large integer that is the difference of the caller
      * and the other number passed into the method.
-     * @param otherNum the number to be subtracted from the caller
+     * @param largeInt the number to be subtracted from the caller
      * @return a new large integer that is the difference of the two
+     * @throws ClassCastException if largeInt isn't a LinkedLargeInteger
      */
-   // @Override
-    public LinkedLargeInteger subtract(LinkedLargeInteger otherNum){
+    @Override
+    public LargeInteger subtract(LargeInteger largeInt){
+        LinkedLargeInteger otherNum = (LinkedLargeInteger)largeInt;
         if (this.isZero() || otherNum.isZero()){return this.isZero() ? otherNum.copy() : this.copy();}
         if (this.getSign() != otherNum.getSign()){return this.add(otherNum.negate());}
         else {
@@ -233,22 +237,25 @@ public class LinkedLargeInteger implements LargeInteger{
     
     /**
      * Convenience method to take the difference of a Large Integer and a long.
-     * Immediately converts long to LinkedLargeInteger so see subtract(LinkedLargeInteger otherNum)
+     * Immediately converts long to LinkedLargeInteger so see subtract(LargeInteger largeInt)
      * for more information.
      * @param otherNum the number to subtract from the caller
      * @return the difference of the caller and otherNum
      */
-    public LinkedLargeInteger subtract(long otherNum){
+    public LargeInteger subtract(long otherNum){
         return this.subtract(new LinkedLargeInteger(otherNum));
     }
     
     /**
      * Creates a new Large Integer which is the product of the caller and the other
      * number passed into the method.
-     * @param otherNum the number to be multiplied by
+     * @param largeInt the number to be multiplied by
      * @return the product of the caller and other number
+     * @throws ClassCastException if largeInt isn't a LinkedLargeInteger
      */
-    public LinkedLargeInteger multiply(LinkedLargeInteger otherNum){
+    @Override
+    public LargeInteger multiply(LargeInteger largeInt){
+        LinkedLargeInteger otherNum = (LinkedLargeInteger)largeInt;
         if (this.isZero() || otherNum.isZero()){return new LinkedLargeInteger(0);}
         LargeIntegerBuilder product = this.multiplyMagnitudes(otherNum);
         if (this.getSign() == otherNum.getSign()){product.setSign(1);}
@@ -259,23 +266,26 @@ public class LinkedLargeInteger implements LargeInteger{
     
     /**
      * Convenience method to take the product of a Large Integer and a long.
-     * Immediately converts long to LinkedLargeInteger so see multiply(LinkedLargeInteger otherNum)
+     * Immediately converts long to LinkedLargeInteger so see multiply(LargeInteger largeInt)
      * for more information.
      * @param otherNum the number to multiply by
      * @return the product of the caller and otherNum
      */
-    public LinkedLargeInteger multiply(long otherNum){
+    public LargeInteger multiply(long otherNum){
         return this.multiply(new LinkedLargeInteger(otherNum));
     }
     
     /**
      * Create a new Large Integer which is the whole number quotient of the caller
      * and other number passed into the method.  Decimal is truncated with no rounding.
-     * @param otherNum the number to be divided by
+     * @param largeInt the number to be divided by
      * @return the quotient of caller divided by the other number
      * @throws IllegalArgumentException if the other number is zero
+     * @throws ClassCastException if largeInt isn't a LinkedLargeInteger
      */
-    public LinkedLargeInteger dividedBy(LinkedLargeInteger otherNum){
+    @Override
+    public LargeInteger dividedBy(LargeInteger largeInt){
+        LinkedLargeInteger otherNum = (LinkedLargeInteger)largeInt;
         if (otherNum.isZero()){throw new IllegalArgumentException("Divide by zero exception");}
         if (this.largerMagnitude(otherNum) < 0){return new LinkedLargeInteger(0);}
         if (this.largerMagnitude(otherNum) == 0){return (this.getSign() == otherNum.getSign()) ? new LinkedLargeInteger(1) : new LinkedLargeInteger(-1);}
@@ -287,17 +297,25 @@ public class LinkedLargeInteger implements LargeInteger{
     
     /**
      * Convenience method to divide the caller by a long. This method immediately
-     * converts to a Large Integer so see dividedBy(LinkedLargeInteger otherNum) 
+     * converts to a Large Integer so see dividedBy(LargeInteger largeInt) 
      * for more info.
      * @param otherNum the number to divide by
      * @return the quotient of the caller divided by other number
      */
-    public LinkedLargeInteger dividedBy(long otherNum){
+    public LargeInteger dividedBy(long otherNum){
         return this.dividedBy(new LinkedLargeInteger(otherNum));
     }
     
+    /**
+     * Calculates the remainder of the caller integer divided by the other number
+     * using the formula remainder = caller - ((floor)caller/otherNum * otherNum).
+     * @param largeInt the other number to take the remainder of division by that number
+     * @return the remainder of the integer division of caller and the other number
+     * @throws ClassCastException if largeInt isn't a LinkedLargeInteger
+     */
     @Override
-    public LinkedLargeInteger remainder(LinkedLargeInteger otherNum){
+    public LargeInteger remainder(LargeInteger largeInt){
+        LinkedLargeInteger otherNum = (LinkedLargeInteger)largeInt;
         if (otherNum.isZero()){throw new IllegalArgumentException("Divide by zero exception");}
         if (this.isZero()){return new LinkedLargeInteger(0);}
         else{
@@ -305,12 +323,29 @@ public class LinkedLargeInteger implements LargeInteger{
         }
     }
     
-    public LinkedLargeInteger remaineder(long otherNum){
+    /**
+     * Convenience method that converts otherNum to a LinkedLargeInteger so see
+     * remainder(LargeInteger largeInt) for more information.
+     * @param otherNum the number to take the remainder by
+     * @return the remainder of the caller integer divided by otherNum
+     */
+    @Override
+    public LargeInteger remainder(long otherNum){
         return this.remainder(new LinkedLargeInteger(otherNum));
     }
     
+    /**
+     * Takes the number theory definition of caller mod(largeInt) so if largeInt is
+     * positive the return value is always positive(or zero) and if largeInt is negative
+     * the return value is always negative(or zero).
+     * @param largeInt the number to mod by
+     * @return the group that the caller is in in terms of modular arithmetic by largeInt
+     * @throws ClassCastException if largeInt isn't a LinkedLargeInteger
+     */
     @Override
-    public LinkedLargeInteger modulo(LinkedLargeInteger otherNum){
+    public LargeInteger modulo(LargeInteger largeInt){
+        if (!(largeInt instanceof LinkedLargeInteger)){throw new ClassCastException("Not an instance of LinkedLargeInteger");}
+        LinkedLargeInteger otherNum = (LinkedLargeInteger)largeInt;
         if (otherNum.isZero()){throw new IllegalArgumentException("Division by zero exception");}
         if (this.isZero()){return new LinkedLargeInteger(0);}
         else{
@@ -325,6 +360,13 @@ public class LinkedLargeInteger implements LargeInteger{
         }
     }
     
+    /**
+     * Convenience method that converts otherNum to LinkedLargeInteger so see 
+     * modulo(LargeInteger largeInt) for more information.
+     * @param otherNum the number to mod by
+     * @return the group that the caller is in in terms of modular arithmetic by largeInt
+     */
+    @Override
     public LargeInteger modulo(long otherNum){
         return this.modulo(new LinkedLargeInteger(otherNum));
     }
@@ -332,11 +374,14 @@ public class LinkedLargeInteger implements LargeInteger{
     /**
      * Returns a new Large Integer equal to the caller to the power of other number.
      * Pre-Condition: other number should be greater than or equal to zero
-     * @param otherNum the power to raise the caller to
+     * @param largeInt the power to raise the caller to
      * @return the caller to the power of other number
      * @throws IllegalArgumentException if other number is negative
+     * @throws ClassCastException if largeInt isn't a LinkedLargeInteger
      */
-    public LinkedLargeInteger pow(LinkedLargeInteger otherNum){
+    @Override
+    public LargeInteger pow(LargeInteger largeInt){
+        LinkedLargeInteger otherNum = (LinkedLargeInteger)largeInt;
         if (otherNum.compareTo(0) < 0){
             throw new IllegalArgumentException("Cannot use negative exponents" + otherNum);
         }
@@ -368,17 +413,19 @@ public class LinkedLargeInteger implements LargeInteger{
     
     /**
      * Convenience method that converts other number to a Large Integer so see
-     * pow(LinkedLargeInteger otherNum) for more information.
+     * pow(LargeInteger largeInt) for more information.
      * @param otherNum the number to raise the caller to
      * @return the caller raised to the power of otherNum
      * @throws IllegalArgumentException if otherNum is negative
      */
-    public LinkedLargeInteger pow(long otherNum){
+    @Override
+    public LargeInteger pow(long otherNum){
         if (otherNum < 0){throw new IllegalArgumentException("Cannot use negative exponents" + otherNum);}
         if (otherNum == 0){return new LinkedLargeInteger(1);}
         if (otherNum == 1){return this.copy();}
         return this.pow(new LinkedLargeInteger(otherNum));
     }
+    
     /**
      * Returns the integer digit for a given decimal place. The zeroth decimal place
      * represents the one's place and the first decimal place represents the ten's
@@ -470,11 +517,12 @@ public class LinkedLargeInteger implements LargeInteger{
     /**
      * Compares two large integers and returns 1 if the caller is larger, -1 if
      * the other number is larger, or zero if they are equal.
-     * @param otherNum the large integer to compare against
+     * @param largeInt the large integer to compare against
      * @return 1 if caller is larger, -1 if other is bigger and 0 if they are equal
      */
-   // @Override
-    public int compareTo(LinkedLargeInteger otherNum){
+    @Override
+    public int compareTo(LargeInteger largeInt){
+        LinkedLargeInteger otherNum = (LinkedLargeInteger)largeInt;
         if (this.getSign() > otherNum.getSign()){return 1;}
         if (this.getSign() < otherNum.getSign()){return -1;}
         if (this.isZero() && otherNum.isZero()){return 0;}
@@ -488,7 +536,7 @@ public class LinkedLargeInteger implements LargeInteger{
     
     /**
      * Convenience method that converts other number into a Large Integer so see
-     * compareTo(LinkedLargeInteger otherNum) for more details.
+     * compareTo(LargeInteger largeInt) for more details.
      * @param otherNum the number to compare against
      * @return 1,-1, or 0 if caller is greater than, less than, or equal respectively
      */
@@ -559,10 +607,7 @@ public class LinkedLargeInteger implements LargeInteger{
      * @return true if the number is in the range of the long representation, else false
      */
     public static boolean canUseLong(LinkedLargeInteger number){
-        if (number.compareTo(MAX_LONG) > 0 || number.compareTo(MIN_LONG) < 0){
-            return false;
-        }
-        else {return true;}
+        return (number.compareTo(MAX_LONG) <= 0) && (number.compareTo(MIN_LONG) >= 0);
     }
     
     /**
@@ -675,10 +720,12 @@ public class LinkedLargeInteger implements LargeInteger{
      * @param otherNum the number to divide by
      * @return the positive quotient of the caller divided by other number
      * @throws IllegalArgumentException if the other number is zero
+     * @throws ClassCastException if the value returned from multiply isn't a 
+     * LinkedLargeInteger
      */
     private LargeIntegerBuilder divideMagnitudes(LinkedLargeInteger otherNum){
         if (otherNum.isZero()){throw new IllegalArgumentException("Divide by zero exception");}
-        boolean canUseLong = canUseLong(otherNum.absoluteValue().multiply(new LinkedLargeInteger(10)));
+        boolean canUseLong = canUseLong((LinkedLargeInteger)otherNum.absoluteValue().multiply(new LinkedLargeInteger(10)));
         if (!canUseLong){
             return this.divideMagnitudesWOLong(otherNum);
         }
@@ -730,7 +777,7 @@ public class LinkedLargeInteger implements LargeInteger{
             }
             if (result > 0){
                 quotient.setDigitAtDecimalPlace(result, i);
-                workingNumber = workingNumber.subtract(posOtherNum.multiply(result)).mutableCopy();
+                workingNumber = ((LinkedLargeInteger)workingNumber.subtract(posOtherNum.multiply(result))).mutableCopy();
             }
         }
         return quotient;
@@ -906,15 +953,9 @@ public class LinkedLargeInteger implements LargeInteger{
     /**
      * A mutable large integer which is a private utility class used to build up
      * a new number based on a collection of results during a long computation.
-     * The reason I went for this approach is that LinkedLargeInteger has to be
-     * immutable so I wanted a class that would represent a separate mutable version
-     * which to encapsulate and cut down on name space clutter put into an inner class.
-     * One thing I realized is that if the only way we have to create a new linked
-     * large integer was through a long then it would take away from this classes
-     * purpose as a variable length integer storage device.  If one large integer
-     * is multiplied by another and both are near the range of a long then there would
-     * be no way to compute the product and initialize a linked large integer so 
-     * I knew I needed a way to do these computations independent of the long class.
+     * This allows you to do multiplication, addition, and subtraction by working
+     * digit by digit without having to repeatedly copy the number over and over
+     * again.
      */
     private class LargeIntegerBuilder extends LinkedLargeInteger{
         
