@@ -201,6 +201,7 @@ public class LinkedLargeInteger implements LargeInteger{
      * @param otherNum the long to add
      * @return the sum of the two numbers as a Large Integer
      */
+    @Override
     public LargeInteger add(long otherNum){
         return this.add(new LinkedLargeInteger(otherNum));
     }
@@ -242,6 +243,7 @@ public class LinkedLargeInteger implements LargeInteger{
      * @param otherNum the number to subtract from the caller
      * @return the difference of the caller and otherNum
      */
+    @Override
     public LargeInteger subtract(long otherNum){
         return this.subtract(new LinkedLargeInteger(otherNum));
     }
@@ -271,6 +273,7 @@ public class LinkedLargeInteger implements LargeInteger{
      * @param otherNum the number to multiply by
      * @return the product of the caller and otherNum
      */
+    @Override
     public LargeInteger multiply(long otherNum){
         return this.multiply(new LinkedLargeInteger(otherNum));
     }
@@ -302,6 +305,7 @@ public class LinkedLargeInteger implements LargeInteger{
      * @param otherNum the number to divide by
      * @return the quotient of the caller divided by other number
      */
+    @Override
     public LargeInteger dividedBy(long otherNum){
         return this.dividedBy(new LinkedLargeInteger(otherNum));
     }
@@ -389,25 +393,15 @@ public class LinkedLargeInteger implements LargeInteger{
         if (otherNum.isZero()){return new LinkedLargeInteger(1);}
         if (otherNum.compareTo(1) == 0){return this.copy();}
         else {
-            LargeIntegerBuilder product = this.mutableCopy();
-            if (canUseLong(otherNum)){
-                long otherNumLong = otherNum.toLong();
-                for (int i = 2; i <= otherNumLong; i++){
-                    product = this.multiplyMagnitudes(product);
-                }
+            LinkedLargeInteger product;
+            if (otherNum.isEven()){
+                product = (LinkedLargeInteger)this.pow(otherNum.dividedBy(2));
+                return product.multiply(product);
             }
             else {
-                LargeIntegerBuilder iterator = new LargeIntegerBuilder(2);
-                while (iterator.compareTo(otherNum) <= 0){
-                    product = this.multiplyMagnitudes(product);
-                    iterator.addToDecimalPlace(1, 0);
-                }
+                product = (LinkedLargeInteger)this.pow(otherNum.subtract(1).dividedBy(2));
+                return this.multiply(product).multiply(product);
             }
-            
-            if (otherNum.isOdd() && this.sign.data < 0){
-                product.setSign(-1);
-            }
-            return product.copy();
         }
     }
     
@@ -666,7 +660,7 @@ public class LinkedLargeInteger implements LargeInteger{
     private LargeIntegerBuilder subMagnitudes(LinkedLargeInteger otherNum){
         if (this.largerMagnitude(otherNum) == 0){return new LargeIntegerBuilder();}
         if (this.isZero() || otherNum.isZero()){
-            LargeIntegerBuilder returnValue = null;
+            LargeIntegerBuilder returnValue;
             if (this.isZero()){
                 returnValue = otherNum.mutableCopy();
             }else {
@@ -675,8 +669,8 @@ public class LinkedLargeInteger implements LargeInteger{
             returnValue.setSign(1);
             return returnValue;
         }
-        LargeIntegerBuilder biggerNumber = null;
-        LinkedLargeInteger smallerNumber = null;
+        LargeIntegerBuilder biggerNumber;
+        LinkedLargeInteger smallerNumber;
         if (this.largerMagnitude(otherNum) > 0){
             biggerNumber = this.mutableCopy();
             smallerNumber = otherNum;
