@@ -41,6 +41,9 @@ public class LargeIntegersDriver {
         System.out.println((new LinkedLargeInteger(Long.MIN_VALUE).pow(3)));
         System.out.println((new LinkedLargeInteger(Long.MAX_VALUE)).pow(20));
         System.out.println((new LinkedLargeInteger(Long.MAX_VALUE)).pow(40));
+        System.out.println((new LinkedLargeInteger(Long.MIN_VALUE)).pow(63));
+        System.out.println((new LinkedLargeInteger(-3)).pow(3));
+        System.out.println((new LinkedLargeInteger(-3)).pow(4));
         
         System.out.println();
         System.out.println("String constructor testing");
