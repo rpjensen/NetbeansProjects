@@ -9,9 +9,8 @@ import java.util.Scanner;
  * An 'arbitrary' length integer that can do basic computations and arithmetic whose size is
  * constrained either by your computers memory or by the upper limit of 2^63 - 1 decimal places
  * or within the range {-10^(2^63-1),+10^(2^63-1)} or 9,223,372,036,854,775,807 decimal
- * places. Fun fact: A string with a typical font face and size (8pt) that was 10^(2^63-1) characters
- * long would would span approximately 10^(2^63-21) light years which is approximately
- * 10^(2^63-30) times the size of the observable universe.
+ * places. Fun fact: A number with 9,223,372,036,854,775,807 digits in a typical
+ * font face and size it would span about a light year in length!!!
  * @author Ryan Jensen
  * @version Apr 28, 2014
  */
