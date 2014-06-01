@@ -18,6 +18,9 @@ public class EquationNode {
         this.operator = operator;
         this.parent = parent;
         this.firstChild = firstChild;
+        this.secondChild = null;
+        this.value = null;
+               
     }
     
     public EquationNode(Operator operator, EquationNode parent){
@@ -28,6 +31,8 @@ public class EquationNode {
         this.operator = operator;
         this.parent = parent;
         this.value = value;
+        this.firstChild = null;
+        this.secondChild = null;
     }
     
     public LinkedLargeInteger solve(){
@@ -91,6 +96,9 @@ public class EquationNode {
         return returnValue;
     }
     
+    public void setOperator(Operator operator){
+        this.operator = operator;
+    }
     public void setParent(EquationNode parent){
         this.parent = parent;
     }
@@ -107,6 +115,9 @@ public class EquationNode {
         this.value = value;
     }
     
+    public Operator getOperator(){
+        return this.operator;
+    }
     public EquationNode getParent(){
         return this.parent;
     }

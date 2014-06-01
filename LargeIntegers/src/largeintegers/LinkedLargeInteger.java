@@ -295,7 +295,7 @@ public class LinkedLargeInteger{
      * @return the quotient of the caller divided by other number
      */
     public LinkedLargeInteger dividedBy(long otherNum){
-        return this.dividedBy(new LinkedLargeInteger(otherNum));
+        return this.dividedBy(new LinkedLargeInteger((long)otherNum));
     }
     
     /**
@@ -394,6 +394,34 @@ public class LinkedLargeInteger{
         if (otherNum == 0){return new LinkedLargeInteger(1);}
         if (otherNum == 1){return this.copy();}
         return this.pow(new LinkedLargeInteger(otherNum));
+    }
+    
+    public LinkedLargeInteger exponent(LinkedLargeInteger otherNum){
+        LinkedLargeInteger ten = new LinkedLargeInteger(10);
+        return otherNum.compareTo(0) >= 0 ? (this.multiply(ten.pow(otherNum))) : this.dividedBy(ten.pow(otherNum));
+    }
+    
+    public LinkedLargeInteger exponent(long otherNum){
+        return this.exponent(new LinkedLargeInteger(otherNum));
+    }
+    
+    public LinkedLargeInteger gcd(LinkedLargeInteger otherNum){
+        if (this.isZero()){return otherNum.absoluteValue();}
+        if (otherNum.isZero()){return this.absoluteValue();}
+        
+        LinkedLargeInteger biggerNum = null;
+        LinkedLargeInteger smallerNum = null;
+        int compare = this.largerMagnitude(otherNum);
+        if (compare == 0){
+            return this.absoluteValue();
+        }else if (compare > 0){
+            biggerNum = this.absoluteValue();
+            smallerNum = otherNum.absoluteValue();
+        }else {
+            biggerNum = otherNum.absoluteValue();
+            smallerNum = this.absoluteValue();
+        }
+        return biggerNum.gcdHelper(smallerNum);
     }
     
     /**
@@ -780,6 +808,14 @@ public class LinkedLargeInteger{
         else {return (this.biggestDecimalPlace > otherNum.biggestDecimalPlace) ? 1 : -1;}
     }
     
+    private LinkedLargeInteger gcdHelper(LinkedLargeInteger otherNum){
+        LinkedLargeInteger remainder = this.remainder(otherNum);
+        if (remainder.isZero()){
+            return otherNum;
+        }else {
+            return otherNum.gcdHelper(remainder);
+        }
+    }
     //<<<<<<<<<<<<<<<<<<<<<< Utility Classes Below >>>>>>>>>>>>>>>>>>>>>>>
     //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     

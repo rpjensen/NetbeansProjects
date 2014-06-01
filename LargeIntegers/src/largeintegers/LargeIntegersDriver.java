@@ -15,7 +15,7 @@ public class LargeIntegersDriver {
         LinkedLargeInteger num = new LinkedLargeInteger(100000000);
         LinkedLargeInteger one = new LinkedLargeInteger(1);
         System.out.println(num);
-        LargeInteger num1 = num.add(num);
+        LinkedLargeInteger num1 = num.add(num);
         System.out.println("Add, subtract, multiply,divide, power testing");
         System.out.println(num1);
         System.out.println(num.subtract(one));
@@ -41,7 +41,7 @@ public class LargeIntegersDriver {
         System.out.println((new LinkedLargeInteger(Long.MIN_VALUE).pow(3)));
         System.out.println((new LinkedLargeInteger(Long.MAX_VALUE)).pow(20));
         System.out.println((new LinkedLargeInteger(Long.MAX_VALUE)).pow(40));
-        System.out.println((new LinkedLargeInteger(Long.MIN_VALUE)).pow(1000));
+        System.out.println((new LinkedLargeInteger(Long.MIN_VALUE)).pow(100));
         System.out.println((new LinkedLargeInteger(-3)).pow(3));
         System.out.println((new LinkedLargeInteger(-3)).pow(4));
         
@@ -94,18 +94,22 @@ public class LargeIntegersDriver {
         System.out.println();
         System.out.println("23 remainder 11 cases: ++ +- -+ --");
         
-        System.out.println((new LinkedLargeInteger(23).remainder(11)));
-        System.out.println((new LinkedLargeInteger(23).remainder(-11)));
-        System.out.println((new LinkedLargeInteger(-23).remainder(11)));
-        System.out.println((new LinkedLargeInteger(-23).remainder(-11)));
+        System.out.println(new LinkedLargeInteger(23).remainder(11));
+        System.out.println(new LinkedLargeInteger(23).remainder(-11));
+        System.out.println(new LinkedLargeInteger(-23).remainder(11));
+        System.out.println(new LinkedLargeInteger(-23).remainder(-11));
         
         System.out.println();
         System.out.println("23 mod 11 cases: ++ +- -+ --");
 
-        System.out.println((new LinkedLargeInteger(23).modulo(11)));
-        System.out.println((new LinkedLargeInteger(23).modulo(-11)));
-        System.out.println((new LinkedLargeInteger(-23).modulo(11)));
-        System.out.println((new LinkedLargeInteger(-23).modulo(-11)));
+        System.out.println(new LinkedLargeInteger(23).modulo(11));
+        System.out.println(new LinkedLargeInteger(23).modulo(-11));
+        System.out.println(new LinkedLargeInteger(-23).modulo(11));
+        System.out.println(new LinkedLargeInteger(-23).modulo(-11));
+        System.out.println();
+        System.out.println("Smaller number divided by bigger number test");
+        System.out.println((new LinkedLargeInteger(4733822)).dividedBy(Long.MAX_VALUE));
+
         
     }
 }
