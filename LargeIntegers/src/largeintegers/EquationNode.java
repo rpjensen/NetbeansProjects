@@ -66,9 +66,6 @@ public class EquationNode {
             case NEGATE:
                 returnValue = firstChild.negate();
                 break;
-            case MULT_PARENTHS:
-                returnValue = firstChild.multiply(secondChild);
-                break;
             case POWER:
                 returnValue = firstChild.pow(secondChild);
                 break;
@@ -117,6 +114,10 @@ public class EquationNode {
     
     public Operator getOperator(){
         return this.operator;
+    }
+    
+    public int getOrderOfOpsValue(){
+        return this.operator.getOOP();
     }
     public EquationNode getParent(){
         return this.parent;

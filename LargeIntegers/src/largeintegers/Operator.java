@@ -7,35 +7,52 @@ package largeintegers;
  */
 
 public enum Operator {
-    OPEN_PAREN(),
+
+    OPEN_PAREN(Constants.UNARY),
     ADD(),
     SUBTRACT(ADD),
     MULTIPLY(),
     DIVIDE(MULTIPLY),
     REMAINDER_SHORT(MULTIPLY),
-    NEGATE(MULTIPLY),
-    MULT_PARENTHS(MULTIPLY),
+    NEGATE(Constants.UNARY, MULTIPLY),
     POWER(),
     MOD(),
     EXP_NOTATION(),
-    NUMBER(),
-    CLOSED_PAREN(NUMBER),
-    REMAINDER(NUMBER),
-    GCD(NUMBER);
+    CLOSED_PAREN(Constants.UNARY),
+    REMAINDER(CLOSED_PAREN),
+    GCD(CLOSED_PAREN),
+    NUMBER();
        
-    private int orderOfOps;
+    private final int orderOfOps;
+    private final boolean isUnary;
     
     private Operator(){
-        this.orderOfOps = Counter.value;
-        Counter.value++;
+        this.orderOfOps = Constants.value;
+        Constants.value++;
+        this.isUnary = false;
+    }
+    private Operator(boolean isUnary){
+        this.orderOfOps = Constants.value;
+        Constants.value++;
+        this.isUnary = isUnary;
     }
     
     private Operator(Operator op){
         this.orderOfOps = op.orderOfOps;
+        this.isUnary = false;
+    }
+    
+    private Operator(boolean isUnary,Operator op){
+        this.orderOfOps = op.orderOfOps;
+        this.isUnary = isUnary;
     }
     
     public int getOOP(){
         return this.orderOfOps;
+    }
+    
+    public boolean isUnary(){
+        return this.isUnary;
     }
     
     @Override
@@ -62,9 +79,6 @@ public enum Operator {
                 break;
             case NEGATE:
                 returnString = "Negate -num";
-                break;
-            case MULT_PARENTHS:
-                returnString = "Parenthesis Multiplication a(b)";
                 break;
             case POWER:
                 returnString = "Power ^";
@@ -93,7 +107,8 @@ public enum Operator {
         return returnString;
     }
     
-    private static class Counter{
+    private static class Constants{
         private static int value = 1;
+        private static final boolean UNARY = true;
     }
 }
