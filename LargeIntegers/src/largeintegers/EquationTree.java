@@ -32,17 +32,20 @@ public class EquationTree {
         }
         else if (this.iterator.hasParent()){
             if (this.iterator.parent().getOrderOfOpsValue() < newNode.getOrderOfOpsValue()){
+                //Insert above
                 EquationNode originalParent = this.iterator.parent(); 
                 this.iterator.setParent(newNode);
                 this.iterator.goToParent();
-                this.iterator.setParent(originalParent, true);
+                this.iterator.setParent(originalParent);
             }
             else {
+                //move up tree one then recursive call
                 this.iterator.goToParent();
                 this.addNodeAtCurrent(newNode);
             }
         }
         else{
+            //add above
             this.iterator.setParent(newNode);
             this.top = newNode;
         }

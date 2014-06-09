@@ -12,6 +12,7 @@ package largeintegers;
  */
 public class EquationIterator {
     private EquationNode current;
+    public static final boolean FIRST_CHILD = true;
     
     /**
      * Return a new Equation Iterator pointing to the node current
@@ -53,14 +54,14 @@ public class EquationIterator {
     }
     
     /**
-     * @return current nodes parent or null if it doesn't exist 
+     * @return current node's parent or null if it doesn't exist 
      */
     public EquationNode parent(){
         return this.current.getParent();
     }
     
     /**
-     * @return current nodes 
+     * @return current node's first child or null if it doesn't 
      */
     public EquationNode firstChild(){
         return this.current.getFirstChild();
@@ -86,15 +87,20 @@ public class EquationIterator {
     }
     
     public void setParent(EquationNode parent){
-        this.setParent(parent, false);
+        if (parent.getOperator().isUnary() || parent.getFirstChild() == null){
+            this.forceSetParent(parent, FIRST_CHILD);
+        }
+        else {
+            this.forceSetParent(parent, !FIRST_CHILD);
+        }
     }
     
-    public void setParent(EquationNode parent, boolean asSecondChild){
+    public void forceSetParent(EquationNode parent, boolean asFirstChild){
         this.current.setParent(parent);
-        if (asSecondChild){
-            parent.setSecondChild(this.current);
-        }else {
+        if (asFirstChild){
             parent.setFirstChild(this.current);
+        }else {
+            parent.setSecondChild(this.current);
         }  
     }
     

@@ -60,46 +60,46 @@ public enum Operator {
         String returnString = null;
         switch (this){
             case OPEN_PAREN:
-                returnString = "Open Parenthesis";
+                returnString = "Open Parenthesis:";
                 break;
             case ADD:
-                returnString = "Add +";
+                returnString = "Add:";
                 break;
             case SUBTRACT:
-                returnString = "Subtract -";
+                returnString = "Subtract:";
                 break;
             case MULTIPLY:
-                returnString = "Multiply * or X or x";
+                returnString = "Multiply:";
                 break;
             case DIVIDE:
-                returnString = "Divide /";
+                returnString = "Divide:";
                 break;
             case REMAINDER_SHORT:
-                returnString = "Short Remainder %";
+                returnString = "Short Remainder:";
                 break;
             case NEGATE:
-                returnString = "Negate -num";
+                returnString = "Negate:";
                 break;
             case POWER:
-                returnString = "Power ^";
+                returnString = "Power:";
                 break;
             case REMAINDER:
-                returnString = "Long Remainder rem(a,b)";
+                returnString = "Long Remainder:";
                 break;
             case MOD:
-                returnString = "Modulo a mod b";
+                returnString = "Modulo:";
                 break;
             case EXP_NOTATION:
-                returnString = "Exp Notation aE10";
+                returnString = "Exp Notation:";
                 break;
             case NUMBER:
-                returnString = "Number";
+                returnString = "Number:";
                 break;
             case CLOSED_PAREN:
-                returnString = "Closed Parenthesis";
+                returnString = "Closed Parenthesis:";
                 break;
             case GCD:
-                returnString = "Greatest Common Factor gcd(a,b)";
+                returnString = "GCD";
                 break;  
             default:
                 returnString = "Unknown operator";
@@ -110,5 +110,13 @@ public enum Operator {
     private static class Constants{
         private static int value = 1;
         private static final boolean UNARY = true;
+    }
+    
+    public static void main(String[] args){
+        for (Operator op : Operator.values()){
+            System.out.println(op);
+            System.out.println(op.isUnary + " " + op.orderOfOps);
+            System.out.println();
+        }
     }
 }
