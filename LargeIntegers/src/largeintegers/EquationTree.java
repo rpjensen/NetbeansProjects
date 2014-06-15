@@ -11,8 +11,13 @@ public class EquationTree {
     private EquationIterator iterator;
     
     public EquationTree(EquationNode top){
-        this.top = new EquationNode(top.getOperator(), null, top.getValue());
+        this.top = top.copy();
         this.iterator = new EquationIterator(this.top);
+    }
+    
+    public EquationTree(){
+        this.top = null;
+        this.iterator = null;
     }
     
     public EquationIterator getIterator(){
@@ -20,6 +25,12 @@ public class EquationTree {
     }
     
     public void addNodeAtCurrent(EquationNode newNode){
+        newNode = newNode.copy();//get own copy without references
+        //Short circuit to allow an empty equation tree to work seemlessly
+        if (this.top == null){
+            this.setTop(newNode);
+            return;
+        }
         if (newNode.getOperator() == Operator.OPEN_PAREN || (this.getCurrentOperator().getOOP() < newNode.getOrderOfOpsValue())){
             if (this.getCurrentOperator().isUnary()){
                 this.iterator.setFirstChild(newNode);
@@ -81,5 +92,9 @@ public class EquationTree {
     private Operator getCurrentOperator(){
         return this.iterator.getCurrent().getOperator();
     }
-        
+       
+    private void setTop(EquationNode top){
+        this.top = top.copy();
+        this.iterator = new EquationIterator(this.top);
+    }
 }

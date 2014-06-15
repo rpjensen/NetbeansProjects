@@ -102,6 +102,10 @@ public class EquationNode {
         return returnValue;
     }
     
+    public EquationNode copy(){
+        //note both operator and value are immutable objects
+        return new EquationNode(this.operator, this.value);
+    }
     public void setOperator(Operator operator){
         this.operator = operator;
     }
