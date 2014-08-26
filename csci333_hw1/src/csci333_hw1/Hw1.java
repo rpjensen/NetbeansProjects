@@ -63,11 +63,59 @@ public class Hw1 {
         return -1;//To assure to netbeans that a value is returned
     }
     
-    
     /**
-     * @param args the command line arguments
+     * Convenience method to search the whole array recursively 
+     * @param a the array to search
+     * @param searchTerm the term to search for
+     * @return the index of first occurrence, else -1
      */
+    public static int trinarySearch(int[] a, int searchTerm){
+        return trinarySearch(a, searchTerm, 0, a.length - 1);
+    }
+    
     public static void main(String[] args) {
-        // TODO code application logic here
+        //testing for Trinary Search
+        int[] test1 = {-45};
+        int[] test2 = {-45, 0};
+        int[] test3 = {0,1,2,3,4,5,6,7,8,9,10,11,12,13};
+        int[] test4 = {0,1,1,1,4,4,7,7,12,14,65,333};
+        int[] test5 = new int[0];
+        
+        System.out.println("Expected: 0");
+        System.out.println("Actual: " + trinarySearch(test1, -45));
+        System.out.println("----------------------------");
+        System.out.println("Expected: -1");
+        System.out.println("Actual: " + trinarySearch(test1, -47));
+        System.out.println("----------------------------");
+        System.out.println("Expected: -1");
+        System.out.println("Actual: " + trinarySearch(test2, -1));
+        System.out.println("----------------------------");
+        System.out.println("Expected: 1");
+        System.out.println("Actual: " + trinarySearch(test2, 0));
+        System.out.println("----------------------------");
+        System.out.println("Expected: 11");
+        System.out.println("Actual: " + trinarySearch(test3, 11));
+        System.out.println("----------------------------");
+        System.out.println("Expected: -1");
+        System.out.println("Actual: " + trinarySearch(test3, 19));
+        System.out.println("----------------------------");
+        System.out.println("Expected: 1");
+        System.out.println("Actual: " + trinarySearch(test4, 1));
+        System.out.println("----------------------------");
+        System.out.println("Expected: 6");
+        System.out.println("Actual: " + trinarySearch(test4, 7));
+        System.out.println("----------------------------");
+        System.out.println("Expected: 10");
+        System.out.println("Actual: " + trinarySearch(test4, 65));
+        System.out.println("----------------------------");
+        System.out.println("Expected: 11");
+        System.out.println("Actual: " + trinarySearch(test4, 333));
+        System.out.println("----------------------------"); 
+        System.out.println("Expected: -1");
+        System.out.println("Actual: " + trinarySearch(test5, 65));
+        System.out.println("----------------------------");
+        
+        
+        
     }
 }
