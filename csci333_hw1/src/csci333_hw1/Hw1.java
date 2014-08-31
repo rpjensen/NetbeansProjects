@@ -5,7 +5,7 @@
 package csci333_hw1;
 
 /**
- * Programming portion of the first homework
+ * Programming portion of the first homework for CSCI 333.
  * @author Ryan Jensen
  * @version August 31, 2014
  */
@@ -73,6 +73,12 @@ public class Hw1 {
         return trinarySearch(a, searchTerm, 0, a.length - 1);
     }
     
+    /**
+     * Test the method trinarySearch using 11 test cases on 5 different array
+     * which look at many edge cases such as finding the first occurrence of a
+     * repeated value that is on 1/3, 2/3 divide points.
+     * @param args not used 
+     */
     public static void main(String[] args) {
         //testing for Trinary Search
         int[] test1 = {-45};
