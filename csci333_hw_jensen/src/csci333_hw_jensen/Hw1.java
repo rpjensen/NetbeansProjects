@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package csci333_hw1;
+package csci333_hw_jensen;
 
 /**
  * Programming portion of the first homework for CSCI 333.
