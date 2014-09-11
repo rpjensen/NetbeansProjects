@@ -48,6 +48,11 @@ public class Hw2 {
                 slice2 = first + startIndex;
             }
             
+            System.out.println("start: " + startIndex);
+            System.out.println("end: " + endIndex);
+            System.out.println("slice1: " + slice1);
+            System.out.println("slice2: " + slice2);
+            System.out.println("---");
             if (searchTerm <= a[slice1]){
                 //we need to go down on equals case to make sure we get the first occurance
                 return randomTrinarySearch(a, searchTerm, startIndex, slice1);
