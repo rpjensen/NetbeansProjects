@@ -4,6 +4,7 @@
  */
 package csci333_hw_jensen;
 
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -106,6 +107,8 @@ public class Hw2 {
         int[] test3 = {0,1,2,3,4,5,6,7,8,9,10,11,12,13};
         int[] test4 = {0,1,1,1,4,4,7,7,12,14,65,333};
         int[] test5 = new int[0];
+        
+        System.out.println(Arrays.toString(test3));
         
         System.out.println("Expected: 0");
         System.out.println("Actual: " + randomTrinarySearch(test1, -45));
