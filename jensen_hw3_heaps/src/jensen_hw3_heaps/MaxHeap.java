@@ -86,23 +86,25 @@ public class MaxHeap {
     
     /**
      * A method to fix a heap property violation at a single point
+     * Pre-Condition - i is a legitimate node of the heap
      * Pre-Condition - All nodes below node i are legitimate heaps
      * Pre-Condition - heapSize property accurately counts how many nodes are considered to be in the heap
      * Post-Condition - All nodes at i and below will be a legitimate heap
      * @param i the index of the node that is causing the violation
      */
     protected void maxHeapify(int i){
-        int largestChild = Integer.MIN_VALUE;
-        int largestChildIndex = -1;
-        if (this.leftChild(i) < this.heapSize){
+        int largestChild = this.heap[i];
+        int largestChildIndex = i;
+        
+        if (leftChild(i) < this.heapSize && this.heap[leftChild(i)] > largestChild){
             largestChild = this.heap[this.leftChild(i)];
             largestChildIndex = this.leftChild(i);
         }
-        if (this.rightChild(i) < this.heapSize && largestChild < this.heap[this.rightChild(i)]){
-            largestChild = this.heap[this.rightChild(i)];
-            largestChildIndex = this.rightChild(i);
+        if (rightChild(i) < this.heapSize && this.heap[rightChild(i)] > largestChild){
+            largestChild = this.heap[rightChild(i)];
+            largestChildIndex = rightChild(i);
         }
-        if (largestChildIndex != -1){
+        if (largestChildIndex != i){
             int temp = this.heap[i];
             this.heap[i] = largestChild;
             this.heap[largestChildIndex] = temp;                    
@@ -128,8 +130,8 @@ public class MaxHeap {
         int tempHeapSize = this.heapSize;
         for (int i = this.heapSize - 1; i >= 1; i--){
             int temp = this.heap[0];
-            this.heap[i] = temp;
             this.heap[0] = this.heap[i];
+            this.heap[i] = temp;
             this.heapSize--;
             this.maxHeapify(0);
         }
