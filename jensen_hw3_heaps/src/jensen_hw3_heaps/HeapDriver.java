@@ -41,7 +41,7 @@ public class HeapDriver {
             //create the heap
             MaxHeap heap = new MaxHeap(currentTestCase);
             //print the heap
-            System.out.println("Heap: " + heap.toString());
+            heap.printMaxHeap();
             //sort the array and print the array
             Arrays.sort(currentTestCase);
             System.out.println("PostSort: " + Arrays.toString(currentTestCase));
@@ -56,6 +56,9 @@ public class HeapDriver {
             System.out.println("----------------------\n");   
         }
         
+        System.out.println("\nIf a array sort and heap sort don't have equal values the following string will print");
+        System.out.println("******* Not Equal *******");
+
 
 
         

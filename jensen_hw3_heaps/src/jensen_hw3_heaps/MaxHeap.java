@@ -61,7 +61,7 @@ public class MaxHeap {
      * Creates a printable representation of a max heap including the values and the heap size
      */
     public void printMaxHeap(){
-        System.out.printf("Heap: %s \nHeap Size: %d\n\n", this.toString(), this.heapSize);
+        System.out.printf("Heap: %s \nHeap Size: %d\n", this.toString(), this.heapSize);
     }
     
     /**
