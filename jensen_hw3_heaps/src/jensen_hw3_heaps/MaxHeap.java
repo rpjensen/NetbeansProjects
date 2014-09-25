@@ -114,6 +114,8 @@ public class MaxHeap {
     
     /**
      * This method builds a max heap from the bottom up with values in the heap variable
+     * It is declared final since it won't be overridden for the priority queue then we
+     * won't have issues with its being called in the constructor.
      */
     protected final void buildMaxHeap(){
         for (int i = this.heapSize/2 - 1; i >= 0; i--){
