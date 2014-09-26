@@ -151,21 +151,27 @@ public class Hw5 {
         }
         highDecimal--;//decimal places are numbered from zero
         
-        int[] sorted = new int[array.length];
         for (int i = 0; i <= highDecimal; i++){
-            radixCountingSort(array, sorted, i);
+            array = radixCountingSort(array, i);
         }
     }
     
     
-    public static int[] radixCountingSort(int[] array, int[] sorted, int decimalPlace){
-        int largestValue = 9;
+    public static int[] radixCountingSort(int[] array, int decimalPlace){
+        int largestValue = 9;//base 10
+        int[] digits = new int[array.length];//holds the digits of array for the given decimalPlace
+        int[] sorted = new int[array.length];//will hold the sorted version of array
+        
+        for (int i = 0; i < array.length; i++){
+            sorted[i] = 0;//initialize sorted
+            digits[i] = getDecimalValue(array[i], decimalPlace);//initialize digits
+        }
         
         int[] counts = new int[largestValue+1];//will hold the count of each possible value in [0,largestValue]
         for (int i = 0; i < counts.length; i++){
             counts[i] = 0;//initialize counts to zero
         }
-        for (int i: array){
+        for (int i: digits){
             counts[i]++;//increase the count for each number found in the original array
         }
         
@@ -175,14 +181,19 @@ public class Hw5 {
         }
         int[] where = counts;//switch the varname for readibility (where[val] now gives the index of sorted to put val in)
         
-        //now we go back to front of the original array putting the values into the correct place in sorted
-        for (int i = array.length - 1; i >= 0; i--){
-            int value = array[i];//the current value we are looking at
+        //now we go back to front of the digits array and once we find where it goes we place the original value 
+        //digit cooresponded to in its correct place
+        for (int i = digits.length - 1; i >= 0; i--){
+            int value = digits[i];//the current value we are looking at
             int place = where[value];//the index in sorted to put the value
-            sorted[place] = value;//put the value there
+            sorted[place] = array[i];//put the value from the original array where the digit would have gone (the indexs of digits and array coorespond to each other)
             where[value]--;//the next time value comes up put it one to the left
         } 
         return sorted;
+    }
+    
+    private static int getDecimalValue(int number, int decimal){
+        return (number / (int)Math.pow(10, decimal)) % 10;
     }
     
     /**
