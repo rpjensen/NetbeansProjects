@@ -138,9 +138,13 @@ public class Hw5 {
         return smallBucket;//now the middle where the pivot is in the right place
     }
     
-    
-    public static void radixSort(int[] array){
-        if (array.length <= 1){return;}
+    /**
+     * Applies base 10 radix sorting to the values in array
+     * @param array the array to sort (out of place)
+     * @return a reference to a new sorted version of array
+     */
+    public static int[] radixSort(int[] array){
+        if (array.length <= 1){return Arrays.copyOf(array, array.length);}
         
         int highDecimal = 0;
         for (int i = 0; i < array.length; i++){
@@ -154,9 +158,16 @@ public class Hw5 {
         for (int i = 0; i <= highDecimal; i++){
             array = radixCountingSort(array, i);//switch the reference to the sorted array
         }
+        return array;//the reference is changed in radixCountingSort so that means the original array passed would be unchanged
     }
     
-    
+    /**
+     * Applies the first steps of counting sort to the digits of the given decimal place
+     * but performs the reordering on the full numbers in array
+     * @param array the array to sort (out of place)
+     * @param decimalPlace the decimal place to sort by
+     * @return a reference to a new sorted version of array
+     */
     public static int[] radixCountingSort(int[] array, int decimalPlace){
         int largestValue = 9;//base 10
         int[] digits = new int[array.length];//holds the digits of array for the given decimalPlace
@@ -192,6 +203,13 @@ public class Hw5 {
         return sorted;
     }
     
+    /**
+     * Extracts the value of a particular decimal place in the given number
+     * Decimal indices are 0 indexed 10^0 --> 1's places
+     * @param number the full number
+     * @param decimal the decimal place
+     * @return the digit stored at that decimal place
+     */
     private static int getDecimalValue(int number, int decimal){
         return (number / (int)Math.pow(10, decimal)) % 10;
     }
@@ -265,10 +283,17 @@ public class Hw5 {
         }        
     }
     
+    /**
+     * Simple bubble sort for a given array over the sub array [lower,upper)
+     * (Exclusive upper bound)
+     * @param array the array to sort (in place)
+     * @param lower the lower bound (inclusive)
+     * @param upper the upper bound (exclusive)
+     */
     private static void bubbleSort(int[] array, int lower, int upper){
-        for (int i = 0; i < array.length; i++){
+        for (int i = lower; i < upper; i++){
             int max = i;//max for whats left in the array
-            for (int j = i+1; j < array.length; j++){
+            for (int j = i+1; j < upper; j++){
                 if (array[j] > array[max]){
                     max = j;//new max
                 }
@@ -285,7 +310,8 @@ public class Hw5 {
      * @param args not used
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        
+        
     }
     
 }
