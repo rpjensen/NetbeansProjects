@@ -152,7 +152,7 @@ public class Hw5 {
         highDecimal--;//decimal places are numbered from zero
         
         for (int i = 0; i <= highDecimal; i++){
-            array = radixCountingSort(array, i);
+            array = radixCountingSort(array, i);//switch the reference to the sorted array
         }
     }
     
@@ -194,6 +194,90 @@ public class Hw5 {
     
     private static int getDecimalValue(int number, int decimal){
         return (number / (int)Math.pow(10, decimal)) % 10;
+    }
+    
+   /**
+     * A method to find the value associated with a given order statistic in the
+     * array given. The first order statistic is the smallest value in the array.
+     * Pre-Condition: orderStat is between one and the length of the array
+     * Post-Condition: the returned value will be the nth smallest number in the array
+     * @param array the array to look through
+     * @param orderStat the order statistic to return
+     * @return the value for the given orderStat
+     */
+    public static int deterministicQuickSelect(int[] array, int orderStat){
+        if (orderStat < 1 || orderStat > array.length){throw new IllegalArgumentException("Order Stat should be between 1 and array length: " + orderStat);}
+        int[] copy = new int[array.length];
+        copy = Arrays.copyOf(array, copy.length);
+        return randomizedQuickSelect(copy, 0, copy.length-1, orderStat-1);
+    }
+        
+    /**
+     * Opposed to the pseudocode in the book, this method avoids complicated array
+     * addition for the next i value, but instead exploits the fact that the indices of lower and upper
+     * are absolute relative to the full array.  If we know that a value is in sorted place regardless
+     * of the other values and it is equal to i, we know we have found the i+1'th order
+     * statistic (zero indexing).
+     * @param array the array to search through
+     * @param lower the lower index of the sub array to consider
+     * @param upper the upper index of the sub array to consider
+     * @param i the index the order statistic would be located at in a sorted array
+     * @return the value of the i+1'th order statistic
+     */
+    private static int deterministicQuickSelect(int[] array, int lower, int upper, int i){
+        if (i < lower || i > upper){throw new IllegalArgumentException(String.format("i: %d should be between lower: %d and upper: %d\n", i, lower, upper));}
+        
+        int length = upper - lower + 1;//get the length
+        
+        if (length == 1){return array[lower];}//trivial case
+        
+        int groups = length / 5;
+        int[] medians = new int[groups + 1];
+        for (int j = 0; i <= groups; i++){
+            int low = lower + 5 * j;
+            int high = low + 4;
+            bubbleSort(array, low, high);
+            medians[j] = array[low + (length + 1) / 2]; 
+        }
+        
+         int pivotValue = deterministicQuickSelect(Arrays.copyOf(medians, medians.length), 0, medians.length-1, (medians.length + 1)/2);
+         int pivot = -1;
+         for (int j = 0; j < medians.length; j++){
+             if (medians[j] == pivotValue){
+                 pivot = j;
+                 break;
+             }
+         }
+        
+        //swap
+        int temp = array[pivot];
+        array[pivot] = array[upper];
+        array[upper] = temp;
+        //pivot has the index of the element in the correct place
+        pivot = partition(array, lower, upper);
+        //now test if pivot equals the order desired else recurse in one of two cases
+        if (pivot == i){return array[pivot];}
+        else if (i < pivot){
+            return deterministicQuickSelect(array, lower, pivot-1, i);
+        }
+        else {
+            return deterministicQuickSelect(array, pivot+1, upper, i);
+        }        
+    }
+    
+    private static void bubbleSort(int[] array, int lower, int upper){
+        for (int i = 0; i < array.length; i++){
+            int max = i;//max for whats left in the array
+            for (int j = i+1; j < array.length; j++){
+                if (array[j] > array[max]){
+                    max = j;//new max
+                }
+            }
+            //swap max into the lowest index of the remaining values (i)
+            int temp = array[max];
+            array[max] = array[i];
+            array[i] = array[max];
+        }
     }
     
     /**
