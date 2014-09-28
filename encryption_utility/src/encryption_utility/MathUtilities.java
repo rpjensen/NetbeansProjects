@@ -2,6 +2,7 @@
 
 package encryption_utility;
 
+import java.math.BigInteger;
 import java.util.Random;
 
 /**
@@ -17,12 +18,12 @@ public class MathUtilities {
      * @param b the second number
      * @return the greatest common divisor
      */
-    public static long gcd(long a, long b){
-        if (b == 0){
+    public static BigInteger gcd(BigInteger a, BigInteger b){
+        if (b.equals(BigInteger.ZERO)){
             return a;
         }
         else {
-            return gcd(b, a%b);
+            return gcd(b, a.mod(b));
         }
     }
     
@@ -33,13 +34,16 @@ public class MathUtilities {
      * @param b the second value
      * @return a Triple with the values (d, x, y) in fields (getA(), getB(), getC()) of the triple
      */
-    public static Triple<Long, Long, Long> extendedEuclid(long a, long b){
-        if (b == 0){
-            return new Triple<>(a, (long)1, (long)0);
+    public static Triple<BigInteger, BigInteger, BigInteger> extendedEuclid(BigInteger a, BigInteger b){
+        if (b.equals(BigInteger.ZERO)){
+            return new Triple<>(a, BigInteger.ONE, BigInteger.ZERO);
         }
         else {
-            Triple<Long, Long, Long> trip = extendedEuclid(b, a % b);
-            return new Triple<>(trip.getA(), trip.getC(), trip.getB() - a / b);
+            Triple<BigInteger, BigInteger, BigInteger> result = extendedEuclid(b, a.mod(b));
+            BigInteger di = result.getA();
+            BigInteger xi = result.getB();
+            BigInteger yi = result.getC();
+            return new Triple<>(di, yi, xi.subtract(a.divide(b).multiply(yi)));
         }
     }
     
@@ -52,23 +56,23 @@ public class MathUtilities {
      * @param n the base of the mod
      * @return the value of x that solves ax = b(mod n) or -1 if x DNE (no solutions)
      */
-    public static long modularLinearEquationSolver(long a, long b, long n){
-        if (a < 0){throw new IllegalArgumentException("a should be greater than zero: " + a);}
-        if (a < 0){throw new IllegalArgumentException("n should be greater than zero: " + n);}
+    public static BigInteger modularLinearEquationSolver(BigInteger a, BigInteger b, BigInteger n){
+        if (a.compareTo(BigInteger.ZERO) < 0){throw new IllegalArgumentException("a should be greater than zero");}
+        if (n.compareTo(BigInteger.TEN) <= 0){throw new IllegalArgumentException("n should be greater than zero");}
         //if b < 0 or b >= n make sure 0 <= b < n
-        b = b % n;
-        if (b < 0){
-            b += n;
+        b = b.mod(n);
+        if (b.compareTo(BigInteger.ZERO) < 0){
+            b = b.add(n);
         }
         
-        Triple<Long, Long, Long> result = extendedEuclid(a, n);
-        long d = result.getA();//gcd
-        long xi = result.getB();//d = a*xi + b*yi
-        if (b % d == 0){
-            return (xi * (b / d)) % n;
+        Triple<BigInteger, BigInteger, BigInteger> result = extendedEuclid(a, n);
+        BigInteger d = result.getA();//gcd
+        BigInteger xi = result.getB();//d = a*xi + b*yi
+        if (b.mod(d).equals(BigInteger.ZERO)){
+            return xi.multiply(b.divide(d)).mod(n);
         }
         else {
-            return -1;
+            return new BigInteger("-1");
         }
     }
     
@@ -78,12 +82,12 @@ public class MathUtilities {
      * @param n the base of the mod
      * @return a inverse mode n or -1 of it doesn't have one
      */
-    public static long getInverseMod(long a, long n){
-        if (gcd(a, n) == 1){
-            return modularLinearEquationSolver(a, 1, n);
+    public static BigInteger getInverseMod(BigInteger a, BigInteger n){
+        if (gcd(a, n).equals(BigInteger.ONE)){
+            return modularLinearEquationSolver(a, BigInteger.ONE, n);
         }
         else {
-            return -1;
+            return new BigInteger("-1");
         }
     }
     
@@ -96,18 +100,18 @@ public class MathUtilities {
      * @param n the base of the mod
      * @return the congruent value to a^b(mod n)
      */
-    public static long modularExponent(long a, long b, long n){
-        if (a < 0 || b < 0 || n <= 0){throw new IllegalArgumentException("One of the following conditions were not met: a,b >= 0 and n > 0");}
+    public static BigInteger modularExponent(BigInteger a, BigInteger b, BigInteger n){
+        if (a.compareTo(BigInteger.ZERO) < 0 || b.compareTo(BigInteger.ZERO) < 0 || n.compareTo(BigInteger.ZERO) <= 0){throw new IllegalArgumentException("One of the following conditions were not met: a,b >= 0 and n > 0");}
         
-        long d = 1;
-        String binary = Long.toBinaryString(b);
+        BigInteger d = BigInteger.ZERO;
+        String binary = d.toString(2);
         for (int i = 0; i < binary.length(); i++){
             //adding a new digit to the binary means doubling the binary we have seen so far
             //which means double the exponent which means square the base of the exponent
-            d = (d * d) % n;//a^(2(oldNum)) = (a^(oldNum))^2 = d^2 since d = a^(oldNum)
+            d = d.multiply(d).mod(n);//a^(2(oldNum)) = (a^(oldNum))^2 = d^2 since d = a^(oldNum)
             if (Character.getNumericValue(binary.charAt(i)) == 1){
                 //if the added value is one then we have 2*oldNum + 1 in the exponent
-                d = (d * a) % n;//a^(2*oldNum+1)= a*a^(2*oldNum)=a*d since we alread squared d for this iteration
+                d = d.multiply(a).mod(n);//a^(2*oldNum+1)= a*a^(2*oldNum)=a*d since we alread squared d for this iteration
             }
         }
         return d;
@@ -121,23 +125,23 @@ public class MathUtilities {
      * @param n the value who is being tested for composite nature
      * @return true if a is a witness to n (composite), else false (inconclusive)
      */
-    private static boolean testWitness(long a, long n){
-        String binary = Long.toBinaryString(n-1);
-        int index = binary.lastIndexOf("1");
-        String odd = binary.substring(0, index+1);
-        String even = binary.substring(index + 1);
-        long t = even.length();
-        long u = Long.parseLong(odd, 2);
-        long x0 = modularExponent(a, u, n);
-        long x1 = x0;
-        for (int i = 1; i <= t; i++){
+    private static boolean testWitness(BigInteger a, BigInteger n){
+        BigInteger negOne = n.subtract(BigInteger.ONE);
+        int powOfTwo = negOne.getLowestSetBit();
+        String odd = negOne.toString(2);
+        odd = odd.substring(0, odd.length()-powOfTwo);
+        
+        BigInteger u = new BigInteger(odd, 2);
+        BigInteger x0 = modularExponent(a, u, n);
+        BigInteger x1 = x0;
+        for (int i = 1; i <= powOfTwo; i++){
             x0 = x1;//the final result from last iteration becomes the initial for this iteration
-            x1 = (x0 * x0) % n;
-            if (x1 == 1 && x0 != 1 && x0 != (n - 1)){
+            x1 = x0.multiply(x0).mod(n);
+            if (x1.equals(BigInteger.ONE) && !x0.equals(BigInteger.ONE) && !x0.equals(negOne)){
                 return true;
             }
         }
-        if (x1 != 1){
+        if (!x1.equals(BigInteger.ONE)){
             return true;
         }
         return false;
@@ -151,36 +155,15 @@ public class MathUtilities {
      * @param s the number of witnesses to check
      * @return true if n is (1- 2^(-s)) sure that n is prime, else false if n is definitely composite
      */
-    public static boolean millerRabinPrimality(long n, long s){
+    public static boolean millerRabinPrimality(BigInteger n, long s){
         Random gen = new Random();
-        for (int j = 0; j < s; j++){
-            long a;
-            if (n > Integer.MAX_VALUE){
-                a = nextLong(gen, n - 1) + 1;//[0,n-1) + 1 = [1, n) = [1, n-1]
-            }
-            else {
-                a = gen.nextInt((int)n - 1) + 1;//[0,n-1) + 1 = [1, n) = [1, n-1]
-            }
+        int bits = n.bitLength() - 1;
+        for (long j = 0; j < s; j++){
+            BigInteger a = new BigInteger(bits, gen);
             if (testWitness(a, n)){
                 return false;
             }
         }
         return true;
-    }
-    
-    /**
-     * Helper method to get a random long within a range from 0 (inclusive) to n (exclusive)
-     * @param rng random number generator
-     * @param n the exclusive upper bound
-     * @return a pseudorandom number from 0 to n-1
-     */
-    private static long nextLong(Random rng, long n) {
-        if (n < 0){throw new IllegalArgumentException("n should be non-negative");}
-        long bits, val;
-        do {
-            bits = (rng.nextLong() << 1) >>> 1;
-            val = bits % n;
-        } while (bits-val+(n-1) < 0L);
-        return val;
     }
 }
