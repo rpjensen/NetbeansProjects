@@ -26,7 +26,7 @@ public class Hw5 {
      * @param sorted the allocated array to store the sorted values
      * @param largestValue the largest value stored in array
      */
-    public static void countingSort(int[] array, int[] sorted, int largestValue){
+    public static int[] countingSort(int[] array, int[] sorted, int largestValue){
         if (array.length != sorted.length){throw new IllegalArgumentException("Array and Sorted should be the same length");}
         if (largestValue < 0){throw new IllegalArgumentException("LargestValue should be greater than or equal to zero");}
         //now that errors have been checked we can procede
@@ -54,6 +54,8 @@ public class Hw5 {
             sorted[place] = value;//put the value there
             where[value]--;//the next time value comes up put it one to the left
         } 
+        
+        return sorted;
     }
     
     /**
@@ -168,7 +170,7 @@ public class Hw5 {
      * @param decimalPlace the decimal place to sort by
      * @return a reference to a new sorted version of array
      */
-    public static int[] radixCountingSort(int[] array, int decimalPlace){
+    private static int[] radixCountingSort(int[] array, int decimalPlace){
         int largestValue = 9;//base 10
         int[] digits = new int[array.length];//holds the digits of array for the given decimalPlace
         int[] sorted = new int[array.length];//will hold the sorted version of array
@@ -234,28 +236,32 @@ public class Hw5 {
      * Opposed to the pseudocode in the book, this method avoids complicated array
      * addition for the next i value, but instead exploits the fact that the indices of lower and upper
      * are absolute relative to the full array.  If we know that a value is in sorted place regardless
-     * of the other values and it is equal to i, we know we have found the i+1'th order
+     * of the other values and it is the ith index, we know we have found the i+1th order
      * statistic (zero indexing).
      * @param array the array to search through
-     * @param lower the lower index of the sub array to consider
-     * @param upper the upper index of the sub array to consider
+     * @param lower the lower index of the sub array to consider (inclusive)
+     * @param upper the upper index of the sub array to consider (inclusive)
      * @param i the index the order statistic would be located at in a sorted array
      * @return the value of the i+1'th order statistic
      */
     private static int deterministicQuickSelect(int[] array, int lower, int upper, int i){
         if (i < lower || i > upper){throw new IllegalArgumentException(String.format("i: %d should be between lower: %d and upper: %d\n", i, lower, upper));}
-        
+        //errors checked begin implementation
         int length = upper - lower + 1;//get the length
         
         if (length == 1){return array[lower];}//trivial case
         
+        //find pivot
         int groups = length / 5;
-        int[] medians = new int[groups + 1];
+        int[] medians = new int[groups + 1];//list of medians O(n)
         for (int j = 0; i <= groups; i++){
             int low = lower + 5 * j;
-            int high = low + 4;
+            int high = low + 5;//exclusive upper bound on bubblesort
+            if (high > upper + 1){
+                high = upper + 1;
+            }
             bubbleSort(array, low, high);
-            medians[j] = array[low + (length + 1) / 2]; 
+            medians[j] = array[low + (high - low - 1) / 2]; 
         }
         
          int pivotValue = deterministicQuickSelect(Arrays.copyOf(medians, medians.length), 0, medians.length-1, (medians.length + 1)/2);
@@ -306,12 +312,94 @@ public class Hw5 {
     }
     
     /**
-     * Testing for HW 5
+     * Testing for HW 5 -- Does automated testing on the four public methods
      * @param args not used
      */
     public static void main(String[] args) {
+        Random gen = new Random();
+        int csFailed = 0;
+        int rsFailed = 0;
+        int qsFailed = 0;
+        int dqsFailed = 0;
+        int testCases = 50;
+        for (int i = 0; i < testCases; i++){
+            int length = gen.nextInt(51);
+            int[] testControl = new int[length];
+            int[] countingSortList = new int[length];
+            int[] radixSortList = new int[length];
+            int[] testSelect = new int[length];
+            for (int j = 0; j < countingSortList.length; j++){
+                int val = gen.nextInt(101);//[0,100]
+                countingSortList[j] = val;//store the value into test array and control array
+                radixSortList[j] = val;
+                testControl[j] = val;
+                testSelect[j] = val;
+            }
+            
+            //print the original and sorted version using the Array class as a control for correctness
+            System.out.println("Original:         " + Arrays.toString(testControl));
+            Arrays.sort(testControl);
+            System.out.println("ArraySort:        " + Arrays.toString(testControl));
+            //countingSort test
+            countingSortList = countingSort(countingSortList, new int[countingSortList.length], 100);
+            System.out.println("Counting Sort:    " + Arrays.toString(countingSortList));
+            if (!Arrays.equals(testControl, countingSortList)){
+                System.out.println("******* NOT EQUAL *******");
+                csFailed++;
+            }
+            //radixSort test
+            radixSortList = radixSort(radixSortList);
+            System.out.println("Radix Sort:       " + Arrays.toString(radixSortList));
+            if (!Arrays.equals(testControl, radixSortList)){
+                System.out.println("******* NOT EQUAL *******");
+                rsFailed++;
+            }         
+            System.out.println("Length:           " + testControl.length);
+
+            //test quick select methods
+            if (testSelect.length != 0){
+                int orderStat = gen.nextInt(testSelect.length) + 1;//[0,length)+1 = [1, length+1) = [1,length]
+                int correctValue = testControl[orderStat-1];//test control is sorted at this point
+                String postfix;
+                switch (orderStat){
+                    case 1:
+                        postfix = "st";
+                        break;
+                    case 2:
+                        postfix = "nd";
+                        break;
+                    case 3:
+                        postfix = "rd";
+                        break;
+                    default:
+                        postfix = "th";
+                                
+                }
+                System.out.printf("The %d%s order stat is: %d\n", orderStat, postfix, correctValue);
+                int rqsValue = randomizedQuickSelect(testSelect, orderStat);
+                System.out.println("Randomized Quick Select Value: " + rqsValue);
+                if (rqsValue != correctValue){
+                    System.out.println("******* NOT EQUAL *******");
+                    qsFailed++;
+                }
+                int dqsValue = deterministicQuickSelect(testSelect, orderStat);
+                System.out.println("Deterministic Quick Select Value: " + dqsValue);
+                if (dqsValue != correctValue){
+                    System.out.println("******* NOT EQUAL *******");
+                    dqsFailed++;
+                }
+            }
+            
+            System.out.println("----------------------------");
+            System.out.println();
+
+                    
+            
+        }
         
-        
+        System.out.println();
+        System.out.printf("Test Summary with %d test cases:\nCounting Sort Failed: %d \nRadix Sort Failed: %d \nRandomized Quick Select Failed: %d \nDeterministic Quick Select Failed: %d \n", testCases, csFailed, rsFailed, qsFailed, dqsFailed);
+  
     }
     
 }
