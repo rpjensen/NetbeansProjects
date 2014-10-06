@@ -11,7 +11,7 @@ import java.util.Random;
  * @author Ryan Jensen
  * @version Oct 4, 2014
  */
-public class ChainedHashTable implements HashTable<Integer>{
+public class ChainedHashTable {
     private final LinkedList<Integer>[] table;
     private final UniversalHashFunction hash;
     
@@ -25,13 +25,11 @@ public class ChainedHashTable implements HashTable<Integer>{
         this.hash = new UniversalHashFunction(this.table.length);
     }
     
-    @Override
     public void insert(Integer key){
         int bucket = hash.hash(key);
         this.table[bucket].add(key);
     }
     
-    @Override
     public Integer delete(Integer key){
         int bucket = hash.hash(key);
         for (Iterator<Integer> i = this.table[bucket].iterator(); i.hasNext(); ){
@@ -44,7 +42,6 @@ public class ChainedHashTable implements HashTable<Integer>{
         return null;
     }
     
-    @Override
     public Integer search(Integer key){
         int bucket = hash.hash(key);
         for (Iterator<Integer> i = this.table[bucket].iterator(); i.hasNext(); ){
@@ -54,6 +51,31 @@ public class ChainedHashTable implements HashTable<Integer>{
             }
         }
         return null;
+    }
+    
+    public void printTable(){
+        int i = 0;
+        for(LinkedList<Integer> list : this.table){
+            System.out.printf("Bucket: %d => %s\n", i, list.toString());
+            i++;
+        }
+    }
+    
+    @Override
+    public String toString(){
+        StringBuilder string = new StringBuilder("[");
+        boolean first = true;
+        for (LinkedList<Integer> list : this.table){
+            for (Integer value : list){
+                if (!first){
+                    string.append(", ");
+                }
+                string.append(value);
+                first = false;
+            }
+        }
+        string.append("]");
+        return string.toString();
     }
     
     private class UniversalHashFunction {

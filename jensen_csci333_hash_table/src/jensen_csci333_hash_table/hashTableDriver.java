@@ -11,6 +11,6 @@ public class hashTableDriver {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        HashTable table = new ChainedHashTable(5);
+        ChainedHashTable table = new ChainedHashTable(5);
     }
 }

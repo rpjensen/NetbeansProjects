@@ -11,7 +11,7 @@ import java.util.Random;
  * @author Ryan Jensen
  * @version Oct 4, 2014
  */
-public class OpenAddressedHashTable implements HashTable<Integer>{
+public class OpenAddressedHashTable {
 
     private  final Integer[] table;
     private  final UniversalHashFunction hash;
@@ -26,7 +26,6 @@ public class OpenAddressedHashTable implements HashTable<Integer>{
     }
     
    
-    @Override
     public void insert(Integer key){
         for (int i = 0; i < this.table.length; i++){
             int bucket = hash.probe(key, i);
@@ -36,10 +35,9 @@ public class OpenAddressedHashTable implements HashTable<Integer>{
                 return;
             }
         }
-        throw new HashTableOverflow("HashTable is full");
+        throw new IllegalStateException("HashTable is full");
     }
     
-    @Override
     public Integer delete(Integer key){
         for (int i = 0; i < this.table.length; i++){
             int bucket = hash.probe(key, i);
@@ -56,7 +54,6 @@ public class OpenAddressedHashTable implements HashTable<Integer>{
         return null;
     }
     
-    @Override
     public Integer search(Integer key){
         for (int i = 0; i < this.table.length; i++){
             int bucket = this.hash.probe(key, i);
@@ -68,6 +65,24 @@ public class OpenAddressedHashTable implements HashTable<Integer>{
             }
         }
         return null;
+    }
+    
+    public void printTable(){
+        
+    }
+    
+    @Override
+    public String toString(){
+        StringBuilder string = new StringBuilder("[");
+        boolean first = true;
+        for (Integer value : this.table){
+            if (!first){
+                string.append(", ");
+            }
+            string.append(value);
+            first = false;
+        }
+        return string.toString();
     }
     
     private class UniversalHashFunction {
