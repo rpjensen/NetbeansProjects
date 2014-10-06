@@ -18,7 +18,8 @@ public class ChainedHashTable {
     public ChainedHashTable(int n){
         int bits = Integer.toBinaryString(n).length();
         
-        this.table =  (LinkedList<Integer>[]) new LinkedList[bits+1];
+        
+        this.table =  (LinkedList<Integer>[]) new LinkedList[1 << (bits)];
         for (int i = 0; i < this.table.length; i++){
             this.table[i] = new LinkedList<>();
         }
@@ -66,13 +67,16 @@ public class ChainedHashTable {
         StringBuilder string = new StringBuilder("[");
         boolean first = true;
         for (LinkedList<Integer> list : this.table){
-            for (Integer value : list){
-                if (!first){
-                    string.append(", ");
-                }
-                string.append(value);
-                first = false;
+            if (list != null){
+                for (Integer value : list){
+                   if (!first){
+                       string.append(", ");
+                   }
+                   string.append(value);
+                   first = false;
+               }               
             }
+
         }
         string.append("]");
         return string.toString();
@@ -96,7 +100,12 @@ public class ChainedHashTable {
         }
         
         private int hash(Integer key){
-            return ((a*key + b) % p) % mod;
+            int val =  (a*key + b) % p;
+            if (val < 0){
+                val = val + p;
+            }
+            val = val % mod;
+            return val;
         }
     }
 }

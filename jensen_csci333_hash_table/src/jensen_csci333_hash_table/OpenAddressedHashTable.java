@@ -21,7 +21,7 @@ public class OpenAddressedHashTable {
     public OpenAddressedHashTable(int n){
         int bits = Integer.toBinaryString(n).length();
         
-        this.table = new Integer[bits+1];  
+        this.table = new Integer[1 << (bits)];  
         this.hash = new UniversalHashFunction(this.table.length);
     }
     
@@ -68,7 +68,24 @@ public class OpenAddressedHashTable {
     }
     
     public void printTable(){
-        
+        StringBuilder string = new StringBuilder("[");
+        boolean first = true;
+        for (Integer value : this.table){
+            if (value != null){
+                if (!first){
+                    string.append(", ");
+                }
+                if (value.equals(DELETED)){
+                    string.append("DELETED");
+                }
+                else {
+                    string.append(value);
+                }
+                first = false;                
+            }
+        }
+        string.append("]");
+        System.out.print(string.toString());
     }
     
     @Override
@@ -76,12 +93,20 @@ public class OpenAddressedHashTable {
         StringBuilder string = new StringBuilder("[");
         boolean first = true;
         for (Integer value : this.table){
-            if (!first){
-                string.append(", ");
+            if (value != null){
+                if (!first){
+                    string.append(", ");
+                }
+                if (value.equals(DELETED)){
+                    string.append("DELETED");
+                }
+                else {
+                    string.append(value);
+                }
+                first = false;                
             }
-            string.append(value);
-            first = false;
         }
+        string.append("]");
         return string.toString();
     }
     
@@ -103,7 +128,12 @@ public class OpenAddressedHashTable {
         }
         
         private int hash(Integer key){
-            return ((a*key + b) % p) % mod;
+            int val =  (a*key + b) % p;
+            if (val < 0){
+                val = val + p;
+            }
+            val = val % mod;
+            return val;
         }
         
         private int probe(Integer key, int index){
