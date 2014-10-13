@@ -149,7 +149,7 @@ public class MathUtilities {
     
     /**
      * Test whether n is prime with a statistical probability 2^(-s) that n is a false prime
-     * There is not a false detection of composite nature (if false is returned n is not prime with 100% certainty)
+     * There is no chance of false detection for composite nature (if false is returned n is not prime with 100% certainty)
      * Pre-Condition: n is an odd, positive integer greater than 2
      * @param n the value to check for primality
      * @param s the number of witnesses to check

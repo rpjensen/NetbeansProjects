@@ -3,42 +3,42 @@
 package encryption_utility;
 
 /**
- * Stores a mutable Triple 
+ * Stores t mutable Triple 
  * @author Ryan Jensen
  * @version Sep 27, 2014
  */
-public class Triple<A, B, C> {
-    private A a;
-    private B b;
-    private C c;
+public class Triple<T, U, V> {
+    private T t;
+    private U u;
+    private V v;
     
-    public Triple(A a, B b, C c){
-        this.a = a;
-        this.b = b;
-        this.c = c;
+    public Triple(T t, U u, V v){
+        this.t = t;
+        this.u = u;
+        this.v = v;
     }
     
-    public A getA(){
-        return this.a;
+    public T getA(){
+        return this.t;
     }
     
-    public void setA(A a){
-        this.a = a;
+    public void setA(T t){
+        this.t = t;
     }
     
-    public B getB(){
-        return this.b;
+    public U getB(){
+        return this.u;
     }
     
-    public void setB(B b){
-        this.b = b;
+    public void setB(U u){
+        this.u = u;
     }
     
-    public C getC(){
-        return this.c;
+    public V getC(){
+        return this.v;
     }
     
-    public void setC(C c){
-        this.c = c;
+    public void setC(V v){
+        this.v = v;
     }
 }
