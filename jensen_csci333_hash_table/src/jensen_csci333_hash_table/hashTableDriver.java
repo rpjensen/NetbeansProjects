@@ -12,6 +12,7 @@ import java.util.Random;
 public class hashTableDriver {
 
     /**
+     * Testing for the two Hash Tables
      * @param args the command line arguments
      */
     public static void main(String[] args) {
@@ -23,8 +24,8 @@ public class hashTableDriver {
         Random gen = new Random();
         Integer[] toRemove = new Integer[(values + 3) / 4];
         Integer[] toFind = new Integer[(values + 2) / 4];
-        int maxNum = 100;
-        int minNum = -100;
+        int maxNum = 50;
+        int minNum = -50;
         for (int i = 0; i < values; i++){
             Integer value = gen.nextInt(maxNum - minNum + 1) + minNum;//[0,maxNum-minNum + 1)+minNum = [minNum, maxNum + 1) = [minNum, maxNum]
             table.insert(value);
