@@ -68,7 +68,7 @@ public class BstNode {
     /**
      * @param leftChild the new left child of this node
      */
-    public void getLeftChild(BstNode leftChild){
+    public void setLeftChild(BstNode leftChild){
         this.leftChild = leftChild;
     }
     
