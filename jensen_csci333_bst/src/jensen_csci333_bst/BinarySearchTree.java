@@ -17,6 +17,10 @@ public class BinarySearchTree {
         this.size = 0;
     }
     
+    public int getSize(){
+        return this.size;
+    }
+    
     public BstNode search(int value){
         return search(value, root);
     }
@@ -74,6 +78,10 @@ public class BinarySearchTree {
         }
         
         return current.getParent();
+    }
+    
+    public void insert(int value){
+        insert(new BstNode(value));
     }
     
     public void insert(BstNode node){
@@ -151,8 +159,8 @@ public class BinarySearchTree {
         return builder.append("]").toString();
     }
     
-    private void preOrderTraversal(BstNode current, StringBuilder builder, boolean first){
-        if (current == null){return;}
+    private boolean preOrderTraversal(BstNode current, StringBuilder builder, boolean first){
+        if (current == null){return first;}
         
         if (!first){
             builder.append(", ");
@@ -160,8 +168,9 @@ public class BinarySearchTree {
         builder.append(current.getValue());
         first = false;
         
-        inOrderTraversal(current.getLeftChild(), builder, first);
-        inOrderTraversal(current.getRightChild(), builder, first);         
+        first = preOrderTraversal(current.getLeftChild(), builder, first);
+        first = preOrderTraversal(current.getRightChild(), builder, first);
+        return first;
     }
     
     public String postOrderTraversal(){
@@ -170,16 +179,17 @@ public class BinarySearchTree {
         return builder.append("]").toString();
     }
     
-    private void postOrderTraversal(BstNode current, StringBuilder builder, boolean first){
-        if (current == null){return;}
+    private boolean postOrderTraversal(BstNode current, StringBuilder builder, boolean first){
+        if (current == null){return first;}
         
-        inOrderTraversal(current.getLeftChild(), builder, first);
-        inOrderTraversal(current.getRightChild(), builder, first);         
+        first = postOrderTraversal(current.getLeftChild(), builder, first);
+        first = postOrderTraversal(current.getRightChild(), builder, first);         
         if (!first){
             builder.append(", ");
         }
         builder.append(current.getValue());
-        first = false; 
+        first = false;
+        return first;
     }
     
     public String inOrderTraversal(){
@@ -188,20 +198,21 @@ public class BinarySearchTree {
         return builder.append("]").toString();
     }
     
-    private void inOrderTraversal(BstNode current, StringBuilder builder, boolean first){
-        if (current == null){return;}
+    private boolean inOrderTraversal(BstNode current, StringBuilder builder, boolean first){
+        if (current == null){return first;}
         
-        inOrderTraversal(current.getLeftChild(), builder, first);
+        first = inOrderTraversal(current.getLeftChild(), builder, first);
         if (!first){
             builder.append(", ");
         }
         builder.append(current.getValue());
         first = false;
-        inOrderTraversal(current.getRightChild(), builder, first);
+        first = inOrderTraversal(current.getRightChild(), builder, first);
+        return first;
     }
     
     public int[] sort(){
-        BstNode current = this.maximum();
+        BstNode current = this.minimum();
         int[] array = new int[this.size];
         for (int i = 0; i < this.size; i++){
             array[i] = current.getValue();
