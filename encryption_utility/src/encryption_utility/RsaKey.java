@@ -6,6 +6,7 @@
 package encryption_utility;
 
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.util.Random;
 
 /**
@@ -24,6 +25,47 @@ public class RsaKey {
     
     public static RsaKey RsaKeyGen(){
         return new RsaKey();
+    }
+    
+    public static class Builder {
+        private BigInteger p;
+        private BigInteger q;
+        private BigInteger n;
+        private BigInteger phiN;
+        private BigInteger d;
+        private BigInteger e;
+        
+        private Builder(){
+            
+        }
+        
+        public void setP(BigInteger p){
+            this.p = p;
+        }
+        
+        public void setQ(BigInteger q){
+            this.q = q;
+        }
+        
+        public void setN(BigInteger n){
+            this.n = n;
+        }
+        
+        public void setPhiN(BigInteger phiN){
+            this.phiN = phiN;
+        }
+        
+        public void setD(BigInteger d){
+            this.d = d;
+        }
+        
+        public void setE(BigInteger e){
+            this.e = e;
+        }
+        
+        public RsaKey build(){
+            return new RsaKey(this);
+        }
     }
     
     private RsaKey(){
@@ -69,6 +111,22 @@ public class RsaKey {
         this.e = key.e;
     }
     
+    private RsaKey(Builder builder){
+        this.p = builder.p;
+        this.q = builder.q;
+        this.phiN = builder.phiN;
+        this.d = builder.d;
+        this.n = builder.n;
+        this.e = builder.e;
+        
+        if (p != null && q != null && !p.multiply(q).equals(n)){
+            throw new IllegalArgumentException("N is not the product of the two primes");
+        }
+        if (phiN != null && d != null && e != null && !d.multiply(e).mod(phiN).equals(BigInteger.ONE)){
+            throw new IllegalArgumentException("e and d are not inverses mod phi(n)");
+        }
+    }
+    
     
     public RsaKey getPublicKey(){
         return new RsaKey(this);
@@ -84,5 +142,66 @@ public class RsaKey {
     
     public BigInteger getBase(){
         return this.n;
+    }
+    
+    @Override
+    public String toString(){
+        StringBuilder builder = new StringBuilder();
+        if (this.p != null && this.q != null){
+            builder.append("Prime 1: ").append(this.p);
+            builder.append("u\fffd").append("Prime 2: ").append(this.q);
+            builder.append("u\fffd").append("Phi(n): ").append(this.phiN);
+            builder.append("u\fffd").append("Private Exponent: ").append(this.d);
+        }
+        builder.append("u\fffd").append("Public Exponent: ").append(this.e);
+        builder.append("u\fffd").append("Modular Base: ").append(this.n);
+        return builder.toString();
+    }
+    
+    public static RsaKey fromString(String rsaKey) throws ParseException {
+        return fromString(rsaKey.split("\ufffd"), 0);
+    }
+    
+    protected static RsaKey fromString(String[] splitStrings, int start) throws ParseException {
+        String[] headers = {"Prime 1: ", "Prime 2: ", "Phi(n): ", "Private Exponent", "Public Exponent: ", "Modular Base: "};
+        int counted = 0;
+        Builder builder = new Builder();
+        for (int i = start; i < splitStrings.length; i++){
+            String current = splitStrings[i];
+            int index = current.indexOf(headers[counted]);
+            String value = current.substring(index+headers[counted].length());
+            if (index == 0){
+                counted++;
+                i--;
+                continue;
+            }
+            switch (headers[counted]){
+                case "Prime 1: ":
+                    builder.p = new BigInteger(value);
+                    break;
+                case "Prime 2: ":
+                    builder.q = new BigInteger(value);
+                    break;
+                case "Phi(n): ":
+                    builder.phiN = new BigInteger(value);
+                    break;
+                case "Private Exponent: ":
+                    builder.d = new BigInteger(value);
+                    break;
+                case "Public Exponenet: ":
+                    builder.e = new BigInteger(value);
+                    break;
+                case "Modular Base: ":
+                    builder.n = new BigInteger(value);
+                    break;
+                default:
+                    throw new ParseException("Failed to parse Rsa Key at line ", i);
+            }
+            counted++;
+            if (counted >= headers.length){
+                return builder.build();
+            }
+        }
+        return builder.build();
     }
 }

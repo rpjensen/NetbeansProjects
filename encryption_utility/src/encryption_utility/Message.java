@@ -27,8 +27,8 @@ public class Message {
     private static final DateFormat dateFormat = DateFormat.getDateInstance();
     
     public static class Builder {
-        private final String hostFrom;
-        private final String ipFrom;
+        private String hostFrom;
+        private String ipFrom;
         private String hostTo;
         private String ipTo;
         private Date date;
@@ -44,6 +44,10 @@ public class Message {
         private Builder(String hostname, String hostIP){
             this.hostFrom = hostname;
             this.ipFrom = hostIP;
+        }
+        
+        private Builder (){
+            
         }
         
         public void setHostTo(String hostName){
@@ -74,7 +78,7 @@ public class Message {
             return new Message(hostFrom, ipFrom, hostTo, ipTo, date, messageBody, rsaKey, sessionKey);
         }
     }
-    
+    //TODO: check validity of message
     private Message(String hostFrom, String ipFrom, String hostTo, String ipTo, Date date, String messageBody, RsaKey rsaKey, String sessionKey){
         this.hostFrom = hostFrom;
         this.ipFrom = ipFrom;
@@ -117,92 +121,80 @@ public class Message {
     
     @Override
     public String toString(){
-        StringBuilder builder = new StringBuilder("From: \n");
-        builder.append(this.hostFrom).append(" (").append(ipFrom).append(")\n");
-        builder.append("To: \n").append(this.hostTo).append(" (").append(ipTo).append(")\n");
-        builder.append("Date/Time: \n").append(this.timestamp).append("\n");
+        StringBuilder builder = new StringBuilder();
+        builder.append("From: ").append(this.hostFrom);
+        builder.append("\ufffd").append("From IP: ").append(this.ipFrom);
+        builder.append("\ufffd").append("To: ").append(this.hostTo);
+        builder.append("\ufffd").append("To IP: ").append(this.ipTo);
+        builder.append("\ufffd").append("Date/Time: ").append(this.timestamp);
         if (this.messageBody != null){
-            builder.append("Message Body: \n").append(this.messageBody).append("\n");
+            builder.append("\ufffd").append("Message Body: ").append(this.messageBody);
         }
         if (this.rsaKey != null){
-            builder.append("RSA Key: \n").append(this.rsaKey.toString()).append("\n");
+            builder.append("\ufffd").append("RSA Key: ").append("\ufffd").append(this.rsaKey.toString()).append("\ufffd").append("RSA End");
         }
         if (this.sessionKey != null){
-            builder.append("Session Key: \n").append(this.sessionKey).append("\n");
+            builder.append("\fffd").append("Session Key: ").append(this.sessionKey);
         }
         
         return builder.toString();
     }
     
+    protected static Message fromString(String[] splitStrings, int start) throws ParseException{
+        String[] headers = {"From: ", "From IP: ", "To: ", "To IP: ", "Date/Time: ", "Message Body: ", "RSA Key: ", "Session Key: "};
+        int counted = 0;
+        Builder builder = new Builder();
+        for (int i = start; i < splitStrings.length; i++){
+            String current = splitStrings[i];
+            int index = current.indexOf(headers[counted]);
+            String value = current.substring(index+headers[counted].length());
+            if (index == 0 && counted <= 4){
+                throw new ParseException("Failed to parse the message at line", i);
+            }
+            else if (index == 0){
+                counted++;
+                i--;
+                continue;
+            }
+            switch (headers[counted]){
+                case "From: ":
+                    builder.hostFrom = value;
+                    break;
+                case "From IP: ":
+                    builder.ipFrom = value;
+                    break;
+                case "To: ":
+                    builder.hostTo = value;
+                    break;
+                case "To IP: ":
+                    builder.ipTo = value;
+                    break;
+                case "Date/Time: ":
+                    builder.date = dateFormat.parse(value);
+                    break;
+                case "Message Body: ":
+                    builder.messageBody = value;
+                    break;
+                case "RSA Key: ":
+                    i++;
+                    builder.rsaKey = RsaKey.fromString(splitStrings, i);
+                    while (splitStrings[i].indexOf("RSA End") == -1){
+                        i++;
+                    }
+                    break;
+                case "Session Key: ":
+                    builder.sessionKey = value;
+                    break;
+            }
+            counted++;
+            if (counted >= headers.length){
+                return builder.build();
+            }
+        }
+        return builder.build();
+    }
+    
     public static Message fromString(String message) throws ParseException {
-        String[] splitString = message.split("\\n");
-        if (splitString.length < 6){
-            throw new IllegalArgumentException("Not enough lines for From, To, Timestamp");
-        }
-        
-        String[] headers = {"From: ", "To: ", "Date/Time: ", "Message Body: ", "RSA Key: ", "Session Key: "};
-        if (!splitString[0].equals(headers[0])){
-            throw new IllegalArgumentException("Wrong Header on line: " + splitString[0]);
-        }
-        String hostFrom = splitString[1].substring(0, splitString[1].indexOf(" ("));
-        String ipFrom = splitString[1].substring(splitString[1].indexOf(" (") + 2, splitString[1].indexOf(")"));
-        
-        Builder build = new Builder(hostFrom, ipFrom);
-        
-        if (!splitString[2].equals(headers[1])){
-            throw new IllegalArgumentException("Wrong Header on line: " + splitString[2]);
-        }
-        String hostTo = splitString[3].substring(0, splitString[3].indexOf(" ("));
-        String ipTo = splitString[3].substring(splitString[3].indexOf(" (") + 2, splitString[3].indexOf(")"));
-        build.setHostTo(hostTo);
-        build.setHostIp(ipTo);
-
-        if (!splitString[4].equals(headers[2])){
-            throw new IllegalArgumentException("Wrong header on line: " + splitString[4]);
-        }
-        String date = splitString[5];
-        build.setDate(dateFormat.parse(date));
-        int next = 6;
-        if (splitString.length > next && splitString[next].equals(headers[3])){
-            next++;
-            StringBuilder builder = new StringBuilder();
-            while (splitString.length > next && !splitString[next].equals(headers[4]) && !splitString[next].equals(headers[5])){
-                builder.append(splitString[next]).append("\n");
-                next++;
-            }
-            String messageString = builder.toString();
-            if (messageString.equals("")){
-                build.setMessageBody(messageString);
-            }
-        }
-        
-        if (splitString.length > next && splitString[next].equals(headers[4])){
-            next++;
-            StringBuilder builder = new StringBuilder();
-            while (splitString.length > next && !splitString[next].equals(headers[5])){
-                builder.append(splitString[next]).append("\n");
-                next++;
-            }
-            String rsaString = builder.toString();
-            if (!rsaString.equals("")){
-                build.setRsaKey(RsaKey.fromString(rsaString));
-            }
-        }
-        
-        if (splitString.length > next && splitString[next].equals(headers[6])){
-            next++;
-            StringBuilder builder = new StringBuilder();
-            while (splitString.length > next && !splitString[next].equals(headers[5])){
-                builder.append(splitString[next]);
-                next++;
-            }
-            String sessionString = builder.toString();
-            if (!sessionString.equals("")){
-                build.setSessionKey(sessionString);
-            }
-        }
-        
-        return build.build();
-        
+        return fromString(message.split("\ufffd"), 0);
     }
 }
