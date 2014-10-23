@@ -103,8 +103,8 @@ public class MathUtilities {
     public static BigInteger modularExponent(BigInteger a, BigInteger b, BigInteger n){
         if (a.compareTo(BigInteger.ZERO) < 0 || b.compareTo(BigInteger.ZERO) < 0 || n.compareTo(BigInteger.ZERO) <= 0){throw new IllegalArgumentException("One of the following conditions were not met: a,b >= 0 and n > 0");}
         
-        BigInteger d = BigInteger.ZERO;
-        String binary = d.toString(2);
+        BigInteger d = BigInteger.ONE;
+        String binary = b.toString(2);
         for (int i = 0; i < binary.length(); i++){
             //adding a new digit to the binary means doubling the binary we have seen so far
             //which means double the exponent which means square the base of the exponent
@@ -165,5 +165,13 @@ public class MathUtilities {
             }
         }
         return true;
+    }
+    
+    public static void main(String[] args){
+        BigInteger b1 = new BigInteger("7");
+        BigInteger b2 = new BigInteger("327");
+        BigInteger b3 = new BigInteger("853");
+        System.out.println(modularExponent(b1, b2, b3));
+        
     }
 }

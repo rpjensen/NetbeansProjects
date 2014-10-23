@@ -16,8 +16,9 @@ import java.util.Arrays;
  */
 public class RsaEncryptor {
     private final RsaKey key;
-    /** The number of bytes per message chunk */
+    /** The number of bytes per original message chunk */
     private final int byteLength;
+    /** The number of bytes per encrypted message chunk */
     private final int encryptByteLength;
     
     public static RsaEncryptor getEncryptorForKey(RsaKey key){
@@ -29,14 +30,18 @@ public class RsaEncryptor {
         int length = this.key.getBase().bitLength();
         int padding = (8 - (length%8)) % 8;//to bring encrypt length to an even bit length
         encryptByteLength = (length + padding)/8;//the length of our encrypted chunks in bytes
-        length--;//
-        length = length - (length % 8);//make sure that length is the smallest multiple of 8 less than base
+        length--;//our message chunks need to be smaller than base.length
+        //we will break the message into the next smallest multiple of 8 bits
         this.byteLength = length / 8;//the number of bytes that each unencrypted chunk holds
         
     }
     
     public byte[] encryptMessage(Message message) throws UnsupportedEncodingException {
-        byte[] encoded = message.toString().getBytes("UTF-16");//get encoded bytes
+        return encryptMessage(message.toString());
+    }
+    
+    public byte[] encryptMessage(String message) throws UnsupportedEncodingException {
+        byte[] encoded = message.getBytes("UTF-16");//get encoded bytes
         int padding = (byteLength - (encoded.length % byteLength)) % byteLength;//how much we add to get the next multiple of byte length
         /*if (padding != 0){
             encoded = Arrays.copyOf(encoded, encoded.length + padding);//pad the back with zeros if necessary
@@ -47,16 +52,17 @@ public class RsaEncryptor {
         
         //unfortunetly our encrypted message chunk can be up to baseLength bits long since it will be up to n-1
         //Each bythLength chunk of the unencrypted message equals a encryptByteLength chunk
-        byte[] encrypted = new byte[groups*this.encryptByteLength];
-        for (int i = 0; i < encrypted.length; i++){
-            encrypted[i] = 0;
-        }
+        byte[] encrypted = new byte[groups*this.encryptByteLength + 2];
+        //byte order mark -> \uFEFF
+        encrypted[0] = -2;//byte order mark 1 -> FE
+        encrypted[1] = -1;//byte order mark 2 -> FF
+        
         
         for (int i = 0; i < groups; i++){
             int offset = i * byteLength;
-            byte[] temp = encryptBytes(Arrays.copyOfRange(encoded, offset, offset + byteLength));
+            byte[] temp = encryptBytes(Arrays.copyOfRange(encoded, offset, offset + byteLength));//automatically pads if we go off the end of the array
             for (int j = 0; j < temp.length; j++){
-                encrypted[i * this.encryptByteLength + j] = temp[j];
+                encrypted[i * this.encryptByteLength + j + 2] = temp[j];
             }
         }
         
@@ -68,13 +74,25 @@ public class RsaEncryptor {
         BigInteger result = MathUtilities.modularExponent(message, key.getPublicExponent(), key.getBase());
         byte[] encoded = result.toByteArray();
         byte[] encrypted = new byte[encryptByteLength];
-        if (encoded.length > encryptByteLength){
-            encoded = Arrays.copyOfRange(encoded, encoded.length - encryptByteLength, encryptByteLength);
+        int padding = encrypted.length - encoded.length;
+        int encodedStart = 0;
+        if (encoded[0] == 0){
+            padding++;
+            encodedStart++;
         }
+        else {
+            encrypted[padding] = encoded[encodedStart];
+        }
+        for (int i = 1; i < encoded.length; i++){
+            encrypted[padding+i] = encoded[i];
+        }
+        
         
         return encoded;
         
     }
             
-    
+    public static void main(String[] args){
+        
+    }
 }

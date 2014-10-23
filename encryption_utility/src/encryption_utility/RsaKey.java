@@ -23,6 +23,8 @@ public class RsaKey {
     private final BigInteger e;
     private static final BigInteger eDefault = new BigInteger("65537");
     
+    public static final int PRIME_SIZE = 512;
+    
     public static RsaKey RsaKeyGen(){
         return new RsaKey();
     }
@@ -73,7 +75,7 @@ public class RsaKey {
         BigInteger num = null;
         do {
             StringBuilder number = new StringBuilder(1);
-            for (int i = 0; i < 510; i++){
+            for (int i = 0; i < PRIME_SIZE - 2; i++){
                 int val = gen.nextInt(2);
                 number.append(val);
             }
@@ -86,7 +88,7 @@ public class RsaKey {
         num = null;
         do {
             StringBuilder number = new StringBuilder(1);
-            for (int i = 0; i < 510; i++){
+            for (int i = 0; i < PRIME_SIZE - 2; i++){
                 int val = gen.nextInt(2);
                 number.append(val);
             }
@@ -144,25 +146,36 @@ public class RsaKey {
         return this.n;
     }
     
-    @Override
-    public String toString(){
-        StringBuilder builder = new StringBuilder();
-        if (this.p != null && this.q != null){
-            builder.append("Prime 1: ").append(this.p);
-            builder.append("u\fffd").append("Prime 2: ").append(this.q);
-            builder.append("u\fffd").append("Phi(n): ").append(this.phiN);
-            builder.append("u\fffd").append("Private Exponent: ").append(this.d);
+    public String toString(int radix){
+        StringBuilder builder = new StringBuilder(this.toSerialString(radix));
+        String sepChar = "\ufffd";
+        String rep = "\n";
+        int found = builder.indexOf(sepChar);
+        while (found != -1){
+            builder.replace(found, found+1, rep);
+            found = builder.indexOf(sepChar);
         }
-        builder.append("u\fffd").append("Public Exponent: ").append(this.e);
-        builder.append("u\fffd").append("Modular Base: ").append(this.n);
         return builder.toString();
     }
     
-    public static RsaKey fromString(String rsaKey) throws ParseException {
-        return fromString(rsaKey.split("\ufffd"), 0);
+    public String toSerialString(int radix){
+        StringBuilder builder = new StringBuilder();
+        if (this.p != null && this.q != null){
+            builder.append("Prime 1: ").append(this.p.toString(radix));
+            builder.append("\ufffd").append("Prime 2: ").append(this.q.toString(radix));
+            builder.append("\ufffd").append("Phi(n): ").append(this.phiN.toString(radix));
+            builder.append("\ufffd").append("Private Exponent: ").append(this.d.toString(radix));
+        }
+        builder.append("\ufffd").append("Public Exponent: ").append(this.e.toString(radix));
+        builder.append("\ufffd").append("Modular Base: ").append(this.n.toString(radix));
+        return builder.toString();
     }
     
-    protected static RsaKey fromString(String[] splitStrings, int start) throws ParseException {
+    public static RsaKey fromSerialString(String rsaKey) throws ParseException {
+        return fromSerialString(rsaKey.split("\ufffd"), 0);
+    }
+    
+    protected static RsaKey fromSerialString(String[] splitStrings, int start) throws ParseException {
         String[] headers = {"Prime 1: ", "Prime 2: ", "Phi(n): ", "Private Exponent", "Public Exponent: ", "Modular Base: "};
         int counted = 0;
         Builder builder = new Builder();
@@ -203,5 +216,13 @@ public class RsaKey {
             }
         }
         return builder.build();
+    }
+    
+    public static void main(String[] args){
+        RsaKey key = RsaKey.RsaKeyGen();
+        System.out.println("running");
+        System.out.println(key.toString(16));
+
+        
     }
 }

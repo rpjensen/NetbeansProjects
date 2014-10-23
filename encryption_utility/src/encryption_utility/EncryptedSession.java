@@ -5,17 +5,18 @@
 
 package encryption_utility;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  * @author Ryan Jensen
  * @version Sep 29, 2014
  */
 public class EncryptedSession {
-    private final Host creator;
-    private final Key creatorKey;
-    private RsaEncryptor hostRsaSign;
-    private final Connection connection;    
-    private final Key connectionKey;
+    private final Map<Key,Host> creator;
+    private final Map<Key,Connection> connection;
+    private RsaEncryptor hostRsaSign;    
     private final String hostName;
     private final String hostIP;
     private AesEncryptor aesEncrypt;
@@ -62,12 +63,14 @@ public class EncryptedSession {
     }
     
     private EncryptedSession(Host creator, Key creatorKey, Connection connection, String hostName, String hostIP, RsaKey rsaKey){
-        this.creator = creator;
-        this.creatorKey = creatorKey;
-        this.connection = connection;
+        this.creator = new HashMap<>();
+        this.creator.put(creatorKey, creator);
+        this.connection = new HashMap<>();
+        Key connectionKey = connection.acceptConnection(this);
+        this.connection.put(connectionKey, connection);
         this.hostName = hostName;
         this.hostIP = hostIP;
-        this.hostRsaSign = new RsaEncrypt(rsaKey);
+        this.hostRsaSign = RsaEncryptor.getEncryptorForKey(rsaKey);
     }
     
     

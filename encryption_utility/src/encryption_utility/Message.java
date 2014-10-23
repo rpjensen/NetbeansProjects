@@ -177,7 +177,7 @@ public class Message {
                     break;
                 case "RSA Key: ":
                     i++;
-                    builder.rsaKey = RsaKey.fromString(splitStrings, i);
+                    builder.rsaKey = RsaKey.fromSerialString(splitStrings, i);
                     while (splitStrings[i].indexOf("RSA End") == -1){
                         i++;
                     }
