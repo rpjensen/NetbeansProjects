@@ -158,7 +158,11 @@ public class RsaKey {
         return builder.toString();
     }
     
-    public String toSerialString(int radix){
+    public String toString(){
+        return toString(10);
+    }
+    
+    private String toSerialString(int radix){
         StringBuilder builder = new StringBuilder();
         if (this.p != null && this.q != null){
             builder.append("Prime 1: ").append(this.p.toString(radix));
@@ -171,19 +175,23 @@ public class RsaKey {
         return builder.toString();
     }
     
+    public String toSerialString(){
+        return toSerialString(10);
+    }
+    
     public static RsaKey fromSerialString(String rsaKey) throws ParseException {
         return fromSerialString(rsaKey.split("\ufffd"), 0);
     }
     
     protected static RsaKey fromSerialString(String[] splitStrings, int start) throws ParseException {
-        String[] headers = {"Prime 1: ", "Prime 2: ", "Phi(n): ", "Private Exponent", "Public Exponent: ", "Modular Base: "};
+        String[] headers = {"Prime 1: ", "Prime 2: ", "Phi(n): ", "Private Exponent: ", "Public Exponent: ", "Modular Base: "};
         int counted = 0;
         Builder builder = new Builder();
         for (int i = start; i < splitStrings.length; i++){
             String current = splitStrings[i];
             int index = current.indexOf(headers[counted]);
             String value = current.substring(index+headers[counted].length());
-            if (index == 0){
+            if (index == -1){
                 counted++;
                 i--;
                 continue;
@@ -201,7 +209,7 @@ public class RsaKey {
                 case "Private Exponent: ":
                     builder.d = new BigInteger(value);
                     break;
-                case "Public Exponenet: ":
+                case "Public Exponent: ":
                     builder.e = new BigInteger(value);
                     break;
                 case "Modular Base: ":
@@ -218,9 +226,13 @@ public class RsaKey {
         return builder.build();
     }
     
-    public static void main(String[] args){
+    public static void main(String[] args)throws ParseException {
         RsaKey key = RsaKey.RsaKeyGen();
-        System.out.println("running");
+        System.out.println(key.toString(16));
+        System.out.println();
+        System.out.println("-----------");
+        String keyStr = key.toSerialString();        
+        RsaKey newKey = RsaKey.fromSerialString(keyStr);
         System.out.println(key.toString(16));
 
         
