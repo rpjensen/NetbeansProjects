@@ -131,7 +131,7 @@ public class Message {
             builder.append("\ufffd").append("Message Body: ").append(this.messageBody);
         }
         if (this.rsaKey != null){
-            builder.append("\ufffd").append("RSA Key: ").append("\ufffd").append(this.rsaKey.toString()).append("\ufffd").append("RSA End");
+            builder.append("\ufffd").append("RSA Key: ").append("\ufffd").append(this.rsaKey.toSerialString()).append("\ufffd").append("RSA End");
         }
         if (this.sessionKey != null){
             builder.append("\fffd").append("Session Key: ").append(this.sessionKey);
@@ -197,4 +197,5 @@ public class Message {
     public static Message fromString(String message) throws ParseException {
         return fromString(message.split("\ufffd"), 0);
     }
+    
 }
