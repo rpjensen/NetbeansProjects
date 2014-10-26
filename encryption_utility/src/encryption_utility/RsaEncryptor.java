@@ -5,14 +5,16 @@
 
 package encryption_utility;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- *
+ * An object that can encrypt/decrypt, sign/unsign messages based on the RSA key
+ * that it stores.
  * @author Ryan Jensen
  * @version Sep 29, 2014
  */
@@ -23,7 +25,32 @@ public class RsaEncryptor {
     /** The number of bytes per encrypted message chunk */
     private final int encryptByteLength;
     
-    public static final Charset CHAR_SET = Charset.forName("UTF-16");
+    public static final Charset CHAR_SET;
+    
+    static {
+        CHAR_SET = Charset.forName("UTF-16");
+    }
+    
+    /**
+     * Returns the 20 byte SHA-1 hash of a given string
+     * @param text the string to take the hash of
+     * @return the 20 byte array of the given hash
+     * @throws NoSuchAlgorithmException if the SHA-1 algorithm is unavailable on this JVM
+     */
+    private static byte[] getHashValue(String text) throws NoSuchAlgorithmException { 
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        return md.digest(text.getBytes(CHAR_SET));
+    }
+    
+    public static String getHashString(String text) throws NoSuchAlgorithmException {
+        return toHexString(getHashValue(text));
+    }
+    
+    public static String toHexString(byte[] bytes){
+        return new BigInteger(bytes).toString(16);
+    }
+    
+    
     private ArrayList<Debug> debug = new ArrayList<>();
     
     private class Debug {
@@ -76,11 +103,48 @@ public class RsaEncryptor {
     }
     
     public byte[] encryptMessage(String message){
-        byte[] encoded = message.getBytes(CHAR_SET);//get encoded bytes
+        if (key.getPublicExponent() == null){ throw new IllegalStateException("Cannot encrypt without public key");}        
+        return encryptBytesUsing(message.getBytes(CHAR_SET), key.getPublicExponent());
+    }
+    
+    public String decryptMessage(String encrypted){
+        return decryptMessage(encrypted.getBytes(CHAR_SET));
+    }
+    
+    public String decryptMessage(byte[] encrypted){
+        if (key.getPrivateExponent() == null){ throw new IllegalStateException("Cannot decrypt without private key");}
+        return new String(decryptBytes(encrypted, key.getPrivateExponent()), CHAR_SET);
+    }
+    
+    public String decryptWithContentLength(byte[] encrypted, int length){
+        return decryptMessage(encrypted).substring(0, length);
+    }
+    
+    public byte[] signMessage(Message message) throws NoSuchAlgorithmException {
+        return signMessage(message.toString());
+    }
+    
+    public byte[] signMessage(String message) throws NoSuchAlgorithmException {
+        if (key.getPrivateExponent() == null){ throw new IllegalStateException("Cannot sign without private key");}        
+        return encryptBytesUsing(RsaEncryptor.getHashString(message).getBytes(CHAR_SET), key.getPrivateExponent());
+    }
+    
+    public byte[] signFromHashString(String hash){
+        if (key.getPrivateExponent() == null){ throw new IllegalStateException("Cannot sign without private key");}
+        return encryptBytesUsing(hash.getBytes(CHAR_SET), key.getPrivateExponent());
+    }
+    
+    public String checkSignature(String signature){
+        return checkSignature(signature.getBytes(CHAR_SET)); 
+    }
+    
+    public String checkSignature(byte[] signature){
+        if (key.getPublicExponent() == null){ throw new IllegalStateException("Cannot unsign without public key");}
+        return new String(decryptBytes(signature, key.getPublicExponent()), CHAR_SET).substring(0, 40);         
+    }
+    
+    private byte[] encryptBytesUsing(byte[] encoded, BigInteger exponent){
         int padding = (byteLength - (encoded.length % byteLength)) % byteLength;//how much we add to get the next multiple of byte length
-        /*if (padding != 0){
-            encoded = Arrays.copyOf(encoded, encoded.length + padding);//pad the back with zeros if necessary
-        }*/
         
         
         int groups = (encoded.length+padding) / byteLength;//this is the number of chunks in the message
@@ -95,7 +159,7 @@ public class RsaEncryptor {
         
         for (int i = 0; i < groups; i++){
             int offset = i * byteLength;
-            byte[] temp = encryptBytes(Arrays.copyOfRange(encoded, offset, offset + byteLength));//automatically pads if we go off the end of the array
+            byte[] temp = encryptBytes(Arrays.copyOfRange(encoded, offset, offset + byteLength), exponent);//automatically pads if we go off the end of the array
             for (int j = 0; j < temp.length; j++){
                 encrypted[i * this.encryptByteLength + j + 2] = temp[j];
             }
@@ -104,14 +168,14 @@ public class RsaEncryptor {
         return encrypted;
     }
     
-    private byte[] encryptBytes(byte[] number){
+    private byte[] encryptBytes(byte[] number, BigInteger exponent){
        // System.out.println("Enc Bytes: " + Arrays.toString(number));
         Debug deb = new Debug();
         debug.add(deb);
         deb.pre = number;
         //System.out.println("Length: " + number.length);
         BigInteger message = new BigInteger(1, number);//unsigned constructor so number is the magnitude and sign is positive
-        BigInteger result = MathUtilities.modularExponent(message, key.getPublicExponent(), key.getBase());
+        BigInteger result = MathUtilities.modularExponent(message, exponent, key.getBase());
         deb.messageIn = message;
         deb.encryptOut = result;        
         byte[] encoded = result.toByteArray();
@@ -129,15 +193,14 @@ public class RsaEncryptor {
         for (int i = encodedStart; i < encoded.length; i++){
             encrypted[padding+i - encodedStart] = encoded[i];
         }
-        
-        
         return encrypted;
     }
     
-    public String decryptMessage(byte[] encrypted){
-        if (key.getPrivateExponent() == null){throw new IllegalArgumentException("Need private key to decrypt message");}
+    private byte[] decryptBytes(byte[] encrypted, BigInteger exponent){
         int groups = encrypted.length / this.encryptByteLength;//get number of groups
-        byte[] decrypted = new byte[groups*this.byteLength];//holds the final result
+        int length = groups*byteLength;
+        if (length % 2 == 1){length++;}
+        byte[] decrypted = new byte[length];//holds the final result
         
         for (int i = 0; i < groups; i++){
             int offset = i * encryptByteLength + 2;//skip two byte order mark
@@ -145,12 +208,11 @@ public class RsaEncryptor {
             Debug deb = debug.get(i);
             deb.encIn = preDecrypt;
             BigInteger number = new BigInteger(1, preDecrypt);
-            BigInteger result = MathUtilities.modularExponent(number, key.getPrivateExponent(), key.getBase());
+            BigInteger result = MathUtilities.modularExponent(number, exponent, key.getBase());
             deb.encryptIn = number;
             deb.messageOut = result;
             byte[] encoded = result.toByteArray();
             deb.raw = encoded;
-            //System.out.println("Before the zero: " + Arrays.toString(encoded));
             int decryptOffset = i * byteLength;//how far into decrypted we are starting
             int padding = byteLength - encoded.length;
             for (int j = 0; j < encoded.length; j++){
@@ -160,82 +222,84 @@ public class RsaEncryptor {
                 decrypted[decryptOffset+padding+j] = encoded[j];
             }
             
-            
-            /*int decryptSet = 0;//number of values we've set into decrypt this iteration
-            if (encoded[0] != 0){
-                //if the first real bit of result was a negative byte then there is
-                //an extra 0 in encoded we should skip
-                decrypted[decryptOffset] = encoded[0];
-                decryptSet++;
-            }
-            for (int j = 1; j < encoded.length; j++){
-                decrypted[decryptOffset + decryptSet] = encoded[j];
-                decryptSet++;
-            }*/
             byte[] values = Arrays.copyOfRange(decrypted, decryptOffset, decryptOffset+byteLength);
             deb.post = values;
-            //System.out.println("After the zero: " + Arrays.toString(values));
-            //System.out.println("Length: " + values.length);
         }
-        return new String(decrypted, CHAR_SET);
-    }
-    
-    public String decryptMessage(String encrypted){
-        return decryptMessage(encrypted.getBytes(CHAR_SET));
+        return decrypted;
     }
             
-    public static void main(String[] args) {
+    public static void main(String[] args) throws NoSuchAlgorithmException {
         RsaKey key = RsaKey.RsaKeyGen();
         System.out.println(key.toString());
         System.out.println();
         System.out.println();
         RsaEncryptor encr = RsaEncryptor.getEncryptorForKey(key);
-        for (int i = 0; i < 1; i++){
-            String test = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec condimentum non mauris vel eleifend. \nCras auctor metus sed nunc efficitur ultrices. Aliquam feugiat, justo sed ullamcorper \nconsectetur, erat lacus sollicitudin orci, a pharetra est \nodio non urna. Donec vehicula nulla sit amet quam rhoncus dignissim. \nIn nisi purus, porta eget fermentum sit amet, euismod vitae neque. \n\n Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec condimentum non mauris vel eleifend. \nCras auctor metus sed nunc efficitur ultrices. Aliquam feugiat, justo sed ullamcorper \nconsectetur, erat lacus sollicitudin orci, a pharetra est \nodio non urna. Donec vehicula nulla sit amet quam rhoncus dignissim. \nIn nisi purus, porta eget fermentum sit amet, euismod vitae neque. \n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Donec condimentum non mauris vel eleifend. \nCras auctor metus sed nunc efficitur ultrices. Aliquam feugiat, justo sed ullamcorper \nconsectetur, erat lacus sollicitudin orci, a pharetra est \nodio non urna. Donec vehicula nulla sit amet quam rhoncus dignissim. \nIn nisi purus, porta eget fermentum sit amet, euismod vitae neque. ";
-            System.out.println(test);
-            System.out.println(test.length());
-            byte[] result = encr.encryptMessage(test);
-            //System.out.println(Arrays.toString(result));
-            //System.out.println("Encoded Length: " + result.length);
-            String results = new String(result, CHAR_SET);
-            //System.out.println(results);
-            //System.out.println("Length: " + results.length());
-            System.out.println(encr.byteLength);
-            System.out.println(encr.encryptByteLength);
-            System.out.println();
-            System.out.println();
-            System.out.println();
-            String decrypt = encr.decryptMessage(result);
-            System.out.println("Byte Length: " + encr.byteLength);
-            System.out.println("Enc Byte Length: " + encr.encryptByteLength);
-            
-            for (Debug deb : encr.debug){
-                System.out.println(encr.debug.indexOf(deb));
-                System.out.print(deb.toString());
-                if (!Arrays.equals(deb.pre, deb.post)){
-                    try {
-                        /*System.out.println();
-                        System.out.println();
-                        System.out.println(new BigInteger(deb.pre).toString(2));
-                        System.out.println(new BigInteger(deb.raw).toString(2));*/
-                        System.out.println();
-                        System.out.println("****** Test Failed ******");
-                        System.out.println();
-                        throw new RuntimeException();
-                    }
-                    catch (RuntimeException e){
-                        
-                    }
-                    
-                    
-                }
-            }
-            System.out.println();
-            System.out.println();
-            System.out.println(decrypt);
-            System.out.println("Length: " + decrypt.length());        }
-        
-        //System.out.println(Arrays.toString(decrypt.getBytes(CHAR_SET)));
 
+        String test = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec condimentum non mauris vel eleifend. \nCras auctor metus sed nunc efficitur ultrices. Aliquam feugiat, justo sed ullamcorper \nconsectetur, erat lacus sollicitudin orci, a pharetra est \nodio non urna. Donec vehicula nulla sit amet quam rhoncus dignissim. \nIn nisi purus, porta eget fermentum sit amet, euismod vitae neque. \n\n Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec condimentum non mauris vel eleifend. \nCras auctor metus sed nunc efficitur ultrices. Aliquam feugiat, justo sed ullamcorper \nconsectetur, erat lacus sollicitudin orci, a pharetra est \nodio non urna. Donec vehicula nulla sit amet quam rhoncus dignissim. \nIn nisi purus, porta eget fermentum sit amet, euismod vitae neque. \n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Donec condimentum non mauris vel eleifend. \nCras auctor metus sed nunc efficitur ultrices. Aliquam feugiat, justo sed ullamcorper \nconsectetur, erat lacus sollicitudin orci, a pharetra est \nodio non urna. Donec vehicula nulla sit amet quam rhoncus dignissim. \nIn nisi purus, porta eget fermentum sit amet, euismod vitae neque.";
+        System.out.println(test);
+        System.out.println(test.length());
+        
+        boolean encodeDecodeTest = false;
+        boolean signatureTesting = true;
+        
+        if (encodeDecodeTest){
+            for (int i = 0; i < 1; i++){
+
+                byte[] result = encr.encryptMessage(test);
+                //System.out.println(Arrays.toString(result));
+                //System.out.println("Encoded Length: " + result.length);
+                String results = new String(result, CHAR_SET);
+                System.out.println(results);
+                //System.out.println("Length: " + results.length());
+                System.out.println(encr.byteLength);
+                System.out.println(encr.encryptByteLength);
+                System.out.println();
+                System.out.println();
+                System.out.println();
+                //String decrypt = encr.decryptMessage(result);
+                String decrypt = encr.decryptWithContentLength(result, test.length());
+                System.out.println("Byte Length: " + encr.byteLength);
+                System.out.println("Enc Byte Length: " + encr.encryptByteLength);
+                boolean detailDebug = false;
+                if (detailDebug){
+                    for (Debug deb : encr.debug){
+                        System.out.println(encr.debug.indexOf(deb));
+                        System.out.print(deb.toString());
+                        if (!Arrays.equals(deb.pre, deb.post)){
+                            try {
+                                System.out.println();
+                                System.out.println("****** Test Failed ******");
+                                System.out.println();
+                                throw new RuntimeException();
+                            }
+                            catch (RuntimeException e){
+
+                            }
+
+
+                        }
+                    }
+                }
+                System.out.println();
+                System.out.println();
+                System.out.println(decrypt);
+                System.out.println("Length: " + decrypt.length());        
+            }
+        }
+        
+        
+        if (signatureTesting){
+            String hash = RsaEncryptor.getHashString(test);
+            System.out.println("Hash String: " + hash);
+            System.out.println("Hash Bytes:      " + Arrays.toString(getHashValue(test)));
+            byte[] signature = encr.signMessage(test);
+            System.out.println("Sig String: " + new String(signature, CHAR_SET));
+            System.out.println("Sig Bytes: " + Arrays.toString(signature));
+            System.out.println("Sig Bytes: " + Arrays.toString(encr.signFromHashString(hash)));
+            String hashOut = encr.checkSignature(signature);
+            System.out.println("Sig Check: " + hashOut);
+            System.out.println("Sig Check Bytes: " + Arrays.toString(hashOut.getBytes(CHAR_SET)));
+        }
+        
     }
 }
