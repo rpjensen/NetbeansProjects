@@ -257,7 +257,7 @@ public class RsaEncryptor {
         System.out.println(test);
         System.out.println(test.length());
         
-        boolean encodeDecodeTest = false;
+        boolean encodeDecodeTest = true;
         boolean signatureTesting = true;
         
         if (encodeDecodeTest){
@@ -278,7 +278,7 @@ public class RsaEncryptor {
                 String decrypt = encr.decryptWithContentLength(result, test.length());
                 System.out.println("Byte Length: " + encr.byteLength);
                 System.out.println("Enc Byte Length: " + encr.encryptByteLength);
-                boolean detailDebug = false;
+                boolean detailDebug = true;
                 if (detailDebug){
                     for (Debug deb : encr.debug){
                         System.out.println(encr.debug.indexOf(deb));

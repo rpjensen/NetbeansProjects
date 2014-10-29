@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Random;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -28,7 +29,7 @@ public class AesEncryptor {
     /** The algorithm of encryption this object uses */
     public static final String ALGORITHM = "AES";
     /** The length of the key this object uses */
-    public static final int KEY_BYTE_LENGTH = 32;
+    public static final int KEY_BYTE_LENGTH = 16;
     /** The Charset this object uses for encoding/decoding of strings */
     public static final Charset CHAR_SET;
         
@@ -46,6 +47,9 @@ public class AesEncryptor {
         byte[] nonPaddedKey = bi.toByteArray();
         int padding = paddedKey.length - nonPaddedKey.length;
         for (int i = 0; i < nonPaddedKey.length; i++){
+            if (i == 0 && padding == -1){
+                continue;
+            }
             paddedKey[i+padding] = nonPaddedKey[i]; 
         }
         return new SecretKeySpec(paddedKey, ALGORITHM);
@@ -67,7 +71,7 @@ public class AesEncryptor {
     
     public static AesEncryptor getEncryptorFromHexKey(String keyAsHex) throws NoSuchAlgorithmException, NoSuchPaddingException {
         if (keyAsHex == null){ throw new NullPointerException("Key should be non-null");}
-        if (keyAsHex.length() != KEY_BYTE_LENGTH * 2){throw new IllegalArgumentException("Key should be 64 hex digits long");}
+        if (keyAsHex.length() != KEY_BYTE_LENGTH * 2){throw new IllegalArgumentException(String.format("Key should be %d hex digits long", KEY_BYTE_LENGTH*2));}
         BigInteger bi = new BigInteger(keyAsHex, 16);
         return new AesEncryptor(new SecretKeySpec(bi.toByteArray(), ALGORITHM));
     }
@@ -109,7 +113,27 @@ public class AesEncryptor {
         return new String(c.doFinal(encrypted),CHAR_SET);
     }
     
-    public static void main(String[] args){
+    public Key getKey(){
+        return this.aesKey;
+    }
+    
+    public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
+        AesEncryptor encr = AesEncryptor.getEncryptor();
+        System.out.println(AesEncryptor.getHexForKey(encr.getKey()));
+        System.out.println();
+        String testString = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec condimentum non mauris vel eleifend. \nCras auctor metus sed nunc efficitur ultrices. Aliquam feugiat, justo sed ullamcorper \nconsectetur, erat lacus sollicitudin orci, a pharetra est \nodio non urna. Donec vehicula nulla sit amet quam rhoncus dignissim. \nIn nisi purus, porta eget fermentum sit amet, euismod vitae neque. \n\n Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec condimentum non mauris vel eleifend. \nCras auctor metus sed nunc efficitur ultrices. Aliquam feugiat, justo sed ullamcorper \nconsectetur, erat lacus sollicitudin orci, a pharetra est \nodio non urna. Donec vehicula nulla sit amet quam rhoncus dignissim. \nIn nisi purus, porta eget fermentum sit amet, euismod vitae neque. \n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Donec condimentum non mauris vel eleifend. \nCras auctor metus sed nunc efficitur ultrices. Aliquam feugiat, justo sed ullamcorper \nconsectetur, erat lacus sollicitudin orci, a pharetra est \nodio non urna. Donec vehicula nulla sit amet quam rhoncus dignissim. \nIn nisi purus, porta eget fermentum sit amet, euismod vitae neque.";
+        System.out.println(testString);
+        System.out.println(testString.length());
+        System.out.println();
+        byte[] encrypted = encr.encryptMessage(testString);
         
+        System.out.println(Arrays.toString(encrypted));
+        System.out.println();
+        String cipherText = new String(encrypted, CHAR_SET);
+        System.out.println(cipherText);
+        System.out.println(cipherText.length());
+        System.out.println();
+        String decrypted = encr.decryptMessage(encrypted);
+        System.out.println(decrypted);
     }
 }
