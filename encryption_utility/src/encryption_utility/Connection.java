@@ -12,7 +12,7 @@ import java.util.Map;
  * @version Oct 12, 2014
  */
 public class Connection {
-    private final Map<Key,EncryptedSession> hosts;
+    private final Map<KeyObject,EncryptedSession> hosts;
     private final ArrayList<String> log;
     
     private Connection(){
@@ -20,11 +20,11 @@ public class Connection {
         this.log = new ArrayList<>();
     }
     
-    public Key acceptConnection(EncryptedSession newHost){
+    public KeyObject acceptConnection(EncryptedSession newHost){
         if (newHost == null){throw new NullPointerException("newHost should not be null");}
         if (hosts.size() > 2){ throw new IllegalStateException("Trying to join an established connection");}
         
-        Key key = new Key();
+        KeyObject key = new KeyObject();
         hosts.put(key, newHost);
         return key;
     }

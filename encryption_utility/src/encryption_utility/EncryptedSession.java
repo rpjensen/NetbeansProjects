@@ -14,8 +14,8 @@ import java.util.Map;
  * @version Sep 29, 2014
  */
 public class EncryptedSession {
-    private final Map<Key,Host> creator;
-    private final Map<Key,Connection> connection;
+    private final Map<KeyObject,Host> creator;
+    private final Map<KeyObject,Connection> connection;
     private RsaEncryptor hostRsaSign;    
     private final String hostName;
     private final String hostIP;
@@ -25,18 +25,18 @@ public class EncryptedSession {
     
     public static class Builder {
         private final Host creator;
-        private final Key creatorKey;
+        private final KeyObject creatorKey;
         private Connection connection;
         private String hostName;
         private String hostIP;
         private RsaKey rsaKey;
         
         
-        public static Builder initWithHostAndKey(Host host, Key key){
+        public static Builder initWithHostAndKey(Host host, KeyObject key){
             return new Builder(host, key);
         }
         
-        private Builder(Host host, Key key){
+        private Builder(Host host, KeyObject key){
             this.creator = host;
             this.creatorKey = key;
         }
@@ -62,11 +62,11 @@ public class EncryptedSession {
         }
     }
     
-    private EncryptedSession(Host creator, Key creatorKey, Connection connection, String hostName, String hostIP, RsaKey rsaKey){
+    private EncryptedSession(Host creator, KeyObject creatorKey, Connection connection, String hostName, String hostIP, RsaKey rsaKey){
         this.creator = new HashMap<>();
         this.creator.put(creatorKey, creator);
         this.connection = new HashMap<>();
-        Key connectionKey = connection.acceptConnection(this);
+        KeyObject connectionKey = connection.acceptConnection(this);
         this.connection.put(connectionKey, connection);
         this.hostName = hostName;
         this.hostIP = hostIP;
