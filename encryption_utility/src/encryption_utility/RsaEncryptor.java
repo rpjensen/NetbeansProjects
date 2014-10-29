@@ -31,23 +31,32 @@ public class RsaEncryptor {
         CHAR_SET = Charset.forName("UTF-16");
     }
     
-    /**
-     * Returns the 20 byte SHA-1 hash of a given string
-     * @param text the string to take the hash of
-     * @return the 20 byte array of the given hash
-     * @throws NoSuchAlgorithmException if the SHA-1 algorithm is unavailable on this JVM
-     */
     private static byte[] getHashValue(String text) throws NoSuchAlgorithmException { 
         MessageDigest md = MessageDigest.getInstance("SHA-1");
         return md.digest(text.getBytes(CHAR_SET));
     }
     
+    /**
+     * Returns the hexadecimal 40 digit SHA-1 hash of the given string 
+     * @param text the string to take the hash of
+     * @return the hash of the given string
+     * @throws NoSuchAlgorithmException if SHA-1 algorithm is not available on this JVM
+     */
     public static String getHashString(String text) throws NoSuchAlgorithmException {
         return toHexString(getHashValue(text));
     }
     
+    /**
+     * Creates a hexadecimal string of an array of bytes
+     * @param bytes the bytes to turn into hex
+     * @return a hexadecimal string representation
+     */
     public static String toHexString(byte[] bytes){
         return new BigInteger(bytes).toString(16);
+    }
+    
+    public static String getStringFromBytes(byte[] bytes){
+        return new String(bytes, CHAR_SET);
     }
     
     
@@ -83,6 +92,11 @@ public class RsaEncryptor {
         }
     }
     
+    /**
+     * Create a new RsaEncryptor with the given key
+     * @param key the key the encryptor will use to encrypt messages
+     * @return 
+     */
     public static RsaEncryptor getEncryptorForKey(RsaKey key){
         return new RsaEncryptor(key);
     }
@@ -116,6 +130,10 @@ public class RsaEncryptor {
         return new String(decryptBytes(encrypted, key.getPrivateExponent()), CHAR_SET);
     }
     
+    public String decryptWithContentLength(String encrypted, int length){
+        return decryptWithContentLength(encrypted.getBytes(CHAR_SET), length);
+    }
+    
     public String decryptWithContentLength(byte[] encrypted, int length){
         return decryptMessage(encrypted).substring(0, length);
     }
@@ -134,11 +152,11 @@ public class RsaEncryptor {
         return encryptBytesUsing(hash.getBytes(CHAR_SET), key.getPrivateExponent());
     }
     
-    public String checkSignature(String signature){
-        return checkSignature(signature.getBytes(CHAR_SET)); 
+    public String decryptSignature(String signature){
+        return decryptSignature(signature.getBytes(CHAR_SET)); 
     }
     
-    public String checkSignature(byte[] signature){
+    public String decryptSignature(byte[] signature){
         if (key.getPublicExponent() == null){ throw new IllegalStateException("Cannot unsign without public key");}
         return new String(decryptBytes(signature, key.getPublicExponent()), CHAR_SET).substring(0, 40);         
     }
@@ -296,7 +314,7 @@ public class RsaEncryptor {
             System.out.println("Sig String: " + new String(signature, CHAR_SET));
             System.out.println("Sig Bytes: " + Arrays.toString(signature));
             System.out.println("Sig Bytes: " + Arrays.toString(encr.signFromHashString(hash)));
-            String hashOut = encr.checkSignature(signature);
+            String hashOut = encr.decryptSignature(signature);
             System.out.println("Sig Check: " + hashOut);
             System.out.println("Sig Check Bytes: " + Arrays.toString(hashOut.getBytes(CHAR_SET)));
         }
