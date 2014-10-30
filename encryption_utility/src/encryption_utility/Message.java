@@ -37,7 +37,7 @@ public class Message {
         private RsaKey rsaKey;
         private String sessionKey;
         
-        public Builder createMessageFrom(Host host){
+        public static Builder createMessageFrom(Host host){
             return new Builder(host.getHostname(), host.getIP());
         }
         
@@ -50,28 +50,34 @@ public class Message {
             
         }
         
-        public void setHostTo(String hostName){
+        public Builder setHostTo(String hostName){
             this.hostTo = hostName;
+            return this;
         }
         
-        public void setHostIp(String hostIp){
+        public Builder setHostIp(String hostIp){
             this.ipTo = hostIp;
+            return this;
         }
         
-        private void setDate(Date date){
+        private Builder setDate(Date date){
             this.date = date;
+            return this;
         }
         
-        public void setMessageBody(String messageBody){
+        public Builder setMessageBody(String messageBody){
             this.messageBody = messageBody;
+            return this;
         }
         
-        public void setRsaKey(RsaKey rsaKey){
+        public Builder setRsaKey(RsaKey rsaKey){
             this.rsaKey = rsaKey;
+            return this;
         }
         
-        public void setSessionKey(String sessionKey){
+        public Builder setSessionKey(String sessionKey){
             this.sessionKey = sessionKey;
+            return this;
         }
         
         public Message build(){

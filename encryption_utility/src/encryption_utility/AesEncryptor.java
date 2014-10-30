@@ -69,55 +69,89 @@ public class AesEncryptor {
         return secondPart;
     }
     
-    public static AesEncryptor getEncryptorFromHexKey(String keyAsHex) throws NoSuchAlgorithmException, NoSuchPaddingException {
+    public static AesEncryptor getEncryptorFromHexKey(String keyAsHex){
         if (keyAsHex == null){ throw new NullPointerException("Key should be non-null");}
         if (keyAsHex.length() != KEY_BYTE_LENGTH * 2){throw new IllegalArgumentException(String.format("Key should be %d hex digits long", KEY_BYTE_LENGTH*2));}
         BigInteger bi = new BigInteger(keyAsHex, 16);
         return new AesEncryptor(new SecretKeySpec(bi.toByteArray(), ALGORITHM));
     }
     
-    public static AesEncryptor getEncryptorFromBigInteger(BigInteger key) throws NoSuchAlgorithmException, NoSuchPaddingException {
+    public static AesEncryptor getEncryptorFromBigInteger(BigInteger key){
         if (key == null){ throw new NullPointerException("Key should be non-null");}
         return new AesEncryptor(new SecretKeySpec(key.toByteArray(), ALGORITHM));
     }
     
-    public static AesEncryptor getEncryptorFromKey(Key key) throws NoSuchAlgorithmException, NoSuchPaddingException{
+    public static AesEncryptor getEncryptorFromKey(Key key){
         if (key == null){ throw new NullPointerException("Key should be non-null");}
         return new AesEncryptor(key);
     }
     
-    public static AesEncryptor getEncryptor() throws NoSuchAlgorithmException, NoSuchPaddingException{
+    public static AesEncryptor getEncryptor(){
         return new AesEncryptor(generateKey());
     }
     
-    private AesEncryptor(Key aesKey) throws NoSuchAlgorithmException, NoSuchPaddingException {
-        this.aesKey = aesKey;
-        this.c = Cipher.getInstance(ALGORITHM);
+    private AesEncryptor(Key aesKey){
+        try {
+            this.aesKey = aesKey;
+            this.c = Cipher.getInstance(ALGORITHM);
+        } 
+        catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("No such algorithm", e);
+        } 
+        catch (NoSuchPaddingException e) {
+            throw new RuntimeException("No such padding", e);
+        }
     }
     
-    public byte[] encryptMessage(Message message) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
+    public byte[] encryptMessage(Message message){
         return encryptMessage(message.toString());
     }
     
-    public byte[] encryptMessage(String message) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        c.init(Cipher.ENCRYPT_MODE, aesKey);
-        return c.doFinal(message.getBytes(CHAR_SET));
+    public byte[] encryptMessage(String message){
+        try {
+            c.init(Cipher.ENCRYPT_MODE, aesKey);
+            return c.doFinal(message.getBytes(CHAR_SET));
+        } 
+        catch (InvalidKeyException e) {
+            throw new RuntimeException("Invalid Key", e);
+        } 
+        catch (IllegalBlockSizeException e) {
+            throw new RuntimeException("Illigal Block Size", e);
+        } 
+        catch (BadPaddingException e) {
+            throw new RuntimeException("Bad padding", e);            
+        }
     }
     
-    public String decryptMessage(String encrypted) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
+    public String decryptMessage(String encrypted){
         return decryptMessage(encrypted.getBytes(CHAR_SET));
     }
     
-    public String decryptMessage(byte[] encrypted) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
-        c.init(Cipher.DECRYPT_MODE, aesKey);
-        return new String(c.doFinal(encrypted),CHAR_SET);
+    public String decryptMessage(byte[] encrypted){
+        try {
+            c.init(Cipher.DECRYPT_MODE, aesKey);
+            return new String(c.doFinal(encrypted), CHAR_SET);
+        } 
+        catch (InvalidKeyException e) {
+            throw new RuntimeException("Invalid Key", e);
+        } 
+        catch (IllegalBlockSizeException e) {
+            throw new RuntimeException("Illigal Block Size", e);
+        } 
+        catch (BadPaddingException e) {
+            throw new RuntimeException("Bad padding", e);            
+        }
     }
     
     public Key getKey(){
         return this.aesKey;
     }
     
-    public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
+    public String getHexKey(){
+        return AesEncryptor.getHexForKey(aesKey);
+    }
+    
+    public static void main(String[] args){
         AesEncryptor encr = AesEncryptor.getEncryptor();
         System.out.println(AesEncryptor.getHexForKey(encr.getKey()));
         System.out.println();

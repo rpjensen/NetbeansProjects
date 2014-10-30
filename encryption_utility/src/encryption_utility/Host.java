@@ -12,8 +12,31 @@ import java.util.ArrayList;
  * @author Ryan Jensen
  * @version Sep 29, 2014
  */
-public interface Host {
-    public Connection createConnection();
+public class Host {
+    private static int currentIp;
+    
+    private ArrayList<Message> recievedMessages;
+    private Network network;
+    private final int hostIp;
+    private final String hostName;
+    private final RsaKey rsaKey;
+    private EncryptedSession currentSession;
+    private KeyObject currentKey;
+    
+    public String getName(){
+        return this.hostName;
+    }
+    
+    public String getIp(){
+        return this.hostIp;
+    }
+    
+    public void createConnection(Connection connection, String hostTo, int hostToIp, EncryptedSession.Requested requested){
+        currentKey = new KeyObject();
+        EncryptedSession.Builder builder = EncryptedSession.Builder.initWithHostAndKey(this, currentKey, requested);
+        currentSession = builder.setHostName(hostTo).setHostIP(hostToIp).setConnection(connection).build();
+        connection.acceptConnection(currentSession);
+    }
     public String getHostname();
     public String getIP();
     public RsaKey getPublicKey();
@@ -22,14 +45,6 @@ public interface Host {
     public void terminateCurrentConnection();
     public ArrayList<EncryptedSession> getActiveSessions();
     public HostType getType();
-    public ArrayList<Message> getSendMessages();
     public ArrayList<Message> getRecievedRessages();
-    
-    public enum HostType {
-        INTERACTIVE,
-        WEB_SERVER,
-        NON_RESPONDER,
-        MAN_IN_THE_MIDDLE;
-    }
     
 }
