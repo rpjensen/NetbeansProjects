@@ -125,13 +125,12 @@ public class Vertex {
      *
      * @param color the desired color of this vertex. Must be one of the
      * following: Vertex.WHITE, Vertex.GRAY, Vertex.BLACK.
-     * @throws Exception Thrown when the parameter is not any of the following:
+     * @throws IllegalArgumentException Thrown when the parameter is not any of the following:
      * Vertex.WHITE, Vertex.GRAY, Vertex.BLACK.
      */
-    public void setColor(int color) throws Exception {
+    public void setColor(int color) {
         if (color != Vertex.WHITE && color != Vertex.GRAY && color != Vertex.BLACK) {
-            System.err.println("Invalid color " + color + " used. Use Vertex.WHITE Vertex.GRAY or Vertex.BLACK.");
-            throw new Exception();
+            throw new IllegalArgumentException("Invalid color " + color + " used. Use Vertex.WHITE Vertex.GRAY or Vertex.BLACK.");
         }
         this.color = color;
     }
@@ -140,12 +139,11 @@ public class Vertex {
      *
      * @param distance Distance from source vertex in the breadth-first tree.
      * Must be nonnegative -- 0 or greater.
-     * @throws Exception Thrown when distance is negative. Note: When any Vertex is constructed, it is automatically set with a Vertex.INFINITE distance.
+     * @throws IllegalArgumentException Thrown when distance is negative. Note: When any Vertex is constructed, it is automatically set with a Vertex.INFINITE distance.
      */
-    public void setDistance(int distance) throws Exception {
+    public void setDistance(int distance) {
         if (distance < 0) {
-            System.err.println("Invalid distance " + distance + " used. Use a nonnegative distance.");
-            throw new Exception();
+            throw new IllegalArgumentException("Invalid distance " + distance + " used. Use a nonnegative distance.");
         }
         this.distance = distance;
     }

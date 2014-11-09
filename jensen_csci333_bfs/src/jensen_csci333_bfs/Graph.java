@@ -18,12 +18,17 @@ public class Graph {
     private Queue<Vertex> queue;
     
     /**
-     * 
-     * @param edges 
+     * Construct a new graph based off the given adjacency matrix.  The graph is
+     * undirected and the vertices are labeled based on their order in the adjacency
+     * from 0, n-1
+     * @param edges the square adjacency matrix of boolean values that correspond to
+     * edges either existing or not existing between the vertices
+     * @throws NullPointerException if edges is null 
+     * @throws IllegalArgumentException if edges is not a square matrix
      */
     public Graph(boolean[][] edges){
-        if (edges == null){ throw new IllegalArgumentException("Edges should be non-null");}
-        
+        if (edges == null){ throw new NullPointerException("Edges should be non-null");}
+                
         this.edges = new boolean[edges.length][edges.length];
         order = this.edges.length;
         vertices = new Vertex[this.edges.length];
@@ -42,6 +47,14 @@ public class Graph {
         queue = new LinkedList<>();
     }
     
+    /**
+     * Creates a string representation of the graph.  The general form follows:
+     * "Vertex Order: order
+     *  Vertex.toString (each on its own row)
+     *  Edges:
+     *  Arrays.toString(single row of adjacency matrix)
+     * @return the string representation
+     */
     @Override
     public String toString(){
         String returnString = "Vertex Order: " + order + "\n";
@@ -55,6 +68,9 @@ public class Graph {
         return returnString;
     }
     
+    /**
+     * Prints the order of the graph and the adjacency matrix to the console
+     */
     public void printGraph(){
         System.out.println("Order: " + order);
         System.out.println("Edges: ");
@@ -64,8 +80,31 @@ public class Graph {
         System.out.println();
     }
     
+    /**
+     * Perform a breadth first search starting at the vertex at index sourceId.
+     * This method affects the parent, color, and distance fields of the vertices
+     * stored in this graph.
+     * @param sourceId the source(starting point) of the breadth first search
+     */
     public void breadthFirstSearch(int sourceId){
+        vertices[sourceId].setColor(Vertex.GRAY);
+        vertices[sourceId].setDistance(0);
+        
         queue.offer(vertices[sourceId]);
+        while (!queue.isEmpty()){
+            Vertex v = queue.remove();//Going for nosuchelm exception over nullpointer since we just did the not empty check
+            v.setColor(Vertex.BLACK);
+            boolean[] neighbors = edges[v.getLabel()];
+            for (int i = 0; i < neighbors.length; i++){
+                if (neighbors[i] && vertices[i].getColor() == Vertex.WHITE){
+                    Vertex u = vertices[i];
+                    u.setColor(Vertex.GRAY);
+                    u.setDistance(v.getDistance()+1);
+                    u.setParent(v);
+                    queue.offer(u);
+                }
+            }
+        }
     }
     
 }
