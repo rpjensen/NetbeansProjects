@@ -11,6 +11,7 @@
 \usepackage{setspace}
 \usepackage{fullpage}
 \usepackage{indentfirst}
+\usepackage{hyperref}
 \onehalfspacing
 \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
 \newcommand{\Z}{\mathbb{Z}}
@@ -78,6 +79,11 @@ Public key cryptosystems are conceptually very simple and satisfy the constraint
 
 The following background information will be necessary to prove that $P$ and $S$ are inverses of each other for all possible encoded messages $M$ we could create.
 \begin{theorem}
+\label{fer_thm}
+\emph{\textbf{Fermat's Little Theorem}} Let $p$ be a prime number, and let $a$ be any number with $a \not \equiv 0 \pmod{p}$.  Then $a^{p-1} \equiv 1 \pmod{p}$.
+\end{theorem}
+
+\begin{theorem}
 \label{eul_thm}
 \emph{\textbf{(Euler's Formula)}} If $\gcd(a, n) = 1$, then $a^{\phi(n)}\equiv 1 \pmod{n}$
 \end{theorem}
@@ -100,13 +106,45 @@ for $i=1,2,...,k$ if and only if
 Now we have all of the necessary components to formally prove the inverse nature of $P$ and $S$ over the set of all messages $M$.
 
 \begin{definition}
+\label{inv_thm}
 For all $M\in \Z$, for all positive, prime integers $p,q$, and for $n=pq$.  If $e\in \N$ and $\gcd(e,\phi(n))=1$ and $d = e^{-1}\pmod{\phi(n)}$ then $M^{ed}\equiv M \pmod{n}$.
 \end{definition}
 
 \begin{proof}
-Let $M\in \Z$, let $p,q$ be positive, prime integers.  Define $n=pq$ and compute $\phi(n) = (p-1)(q-1)$.  Next pick $e\in \N$ so that $e$ is relatively prime to $\phi(n)$ or that $\gcd(e,\phi(n))=1$.  By the linear congruence theorem the equation $ed \equiv 1 \pmod{\phi(n)}$ has exactly $g = \gcd(e,\phi(n))$ solutions if $g \mid 1$; thus $d = e^{-1} \pmod{\phi(n)}$ exists and is unique since $g=1$ and $1\mid 1$.
-
+Let $M\in \Z$, let $p,q$ be positive, prime integers.  Define $n=pq$ and compute ${\phi(n) = (p-1)(q-1)}$.  Next pick $e\in \N$ so that $e$ is relatively prime to $\phi(n)$ or that $\gcd(e,\phi(n))=1$.  By the linear congruence theorem the equation $ed \equiv 1 \pmod{\phi(n)}$ has exactly $g = \gcd(e,\phi(n))$ solutions if $g \mid 1$; thus $d = e^{-1} \pmod{\phi(n)}$ exists and is unique since $g=1$ and $1\mid 1$.\\
+Consider the congruence $M^{ed}\pmod{n}$, since $ed \equiv 1 \pmod{\phi(n)} \implies \phi(n) \mid ed-1 \implies ed = \phi(n)z+1$ for some $z \in \Z$ then $M^{ed}\pmod{n} = M^{\phi(n)z+1}\pmod{n}$.  Now we will break the proof into three exhaustive cases and prove each on individually:\\\\
+\emph{Case 1:} Suppose $n \mid M$.  Then $M=nx$ for some $x\in \Z$ and $M \equiv nx \equiv 0 \pmod{n}$, then $M^{ed} \equiv {(nx)}^{ed} \equiv 0^{ed} \equiv 0 \pmod{n}$.  Thus $M^{ed} \equiv M \equiv 0 \pmod{n}$.\qed
+\\\\
+\emph{Case 2:} Suppose $n\nmid M$ and $\gcd(n,M) \neq 1$. Since $n=pq$ with $p,q$ prime then $p \mid M$ or $q \mid M$.  Without lose of generality suppose that $p | M$.  By theorem \ref{chi_thm2} if $n = pq$ and $\gcd(p,q)=1$ then if $M^{ed} \equiv M \pmod{p}$ and $M^{ed} \equiv M \pmod{q}$ implies $M^{ed} \equiv M \pmod{n}$.  As in case 1, since $p \mid M$ then $M^{ed} \equiv M \equiv 0 \pmod{p}$.  Now it suffices to show that $M^{ed} \equiv M \pmod{q}$.  By our choice of $e,d$ then $M^{ed} \equiv M^{\phi(n)z+1} \equiv M^{z(p-1)(q-1) + 1} \pmod{q}$ since $\phi(n) = (p-1)(q-1)$.  By the laws of exponents $\equiv M^{z(p-1)(q-1) + 1}\equiv M\cdot (M^{(q-1)})^{z(p-q)} \pmod{q}$.  By theorem \ref{fer_thm} $M^{(q-1)} \equiv 1 \pmod{q}$ implies $M\cdot (M^{(q-1)})^{z(p-q)} \equiv {M\cdot (1)^{z(p-q)} \equiv M \pmod{q}}$.  Since $M^{ed} \equiv M \pmod{p}$ and $M^{ed} \equiv M \pmod{q}$ then $M^{ed} \equiv M \pmod{n}$ by theorem \ref{chi_thm2}.  The proof if $q\mid M$ follows the same form with $q$ and $p$'s place switched.\qed
+\\\\
+\emph{Case 3:} Suppose $\gcd(n,M)=1$.  By theorem \ref{eul_thm} if $\gcd(n,M)=1$ then $M^{\phi(n)} \equiv 1  \pmod{n}$.  Thus $M^{ed} \equiv M^{\phi(n)z+1} \equiv M\cdot (M^{\phi(n)})^z \equiv M \cdot (1)^z \equiv M \pmod{n}$.\qed
+\\\\
+Now we have shown that for all $M\in \Z$ $M^{ed} \equiv M \pmod{n}$ by proving it for three different cases which are exhaustive over the integers.
 \end{proof}
+
+\paragraph{Using definition} \ref{inv_thm}, we can prove the correctness of the RSA cryptosystem by showing that $S(P(M))$ is equivalent to $M^{ed} \pmod{n}$ and correctly applying definition \ref{inv_thm}.  To reiterate $P(M) = M^e \equiv C \pmod{n}$ and $S(C) = C^d \equiv M \pmod{n}$.  Composing the functions gives $S(P(M))= (M^e \pmod{n})^d \pmod{n}$.  Since the base of both modulus functions equals $n$ then $(M^e \pmod{n})^d \equiv M^{ed} \pmod{n}$.  By the specification of RSA, $n=pq$ and $e \in \N$ with $\gcd(e, \phi(n))=1$ and $d = e^{-1} \pmod{\phi(n)}$ so now we can apply definition \ref{inv_thm} and state that $M^{ed} \equiv M \pmod{n}$ for all $M\in \Z$.
+
+
+\section{Conclusion}
+
+\paragraph{In practice} the RSA algorithm for encryption and decryption is quite slow when compared to most symmetric encryption algorithms that perform computations computers are better equip to handle.  This fact doesn't make the RSA cryptosystem any less revolutionary or important; it just means that the RSA algorithm is only a piece of the \emph{full} solution.  Technologies looking to provide encryption on a public network that can be expanded to any combination of endpoints, typically use the RSA cryptosystem to establish what is often described as a \textit{handshake}.  One can conceptualize the handshake as the asymmetric portion of the encrypted correspondence which includes: connecting to the other endpoint, exchanging and authenticating the public keys with the other endpoint, then establishing a symmetric secret key often known as the \textit{session key}.  The point that the session key is established, the handshake is officially over and an \textit{encrypted session} has now begun which utilizes the speed of symmetric encryption using the shared session key.  This further explains the use of the work cryptosystem; the RSA cryptosystem provides the best of both asymmetric and symmetric encryption by allowing a medium to safely authenticate and transfer the session key over the public network; once the session is established, the session key is used by both endpoints for encryption and decryption until the session is terminated.  As long as a private key is kept safe, the key can be reused for as many sessions as desired, whereas the symmetric session key should be created at random for each encrypted session with a new endpoint.
+
+\paragraph{In addition,} the asymmetric properties of the RSA cryptosystem allow it to excel at allowing for digital authentication.  Two measures of authentication of a message are confirming its authorship and confirming that it is untampered by a man-in-the-middle attack.  Without these measures, a clever man-in-the-middle could send messages impersonating the endpoint we believe we are communicating with or change some of the contents of a message they intercepted before relaying it the rest of the way to the desired recipient.  Both of these attacks are common ways to commit fraudulent money transfers or steal someones personal records from a large company.  Remember that conceptually, the private key function $S$ can be applied to a message just the same as the public key function $P$; the difference in the two is that for a given message $M$,anyone with $P$ can create $P(M)$ while only the owner of the key $S$ can create the cipher-text $S(M)$.  The cipher-text from applying a private key to a message \emph{before it is sent} is called a digit signature.  It is uniquely tied to the particular message $M$ and the particular key $S$ so without both of those elements it is impossible to forge.  The digital signature's cipher-text can always be undone using the published public key $P$ which allows the recipient of the message/signature pair $(M,S(M))$ to verify that the message was authored by the owner of the key $S$ and untampered by a man-in-the-middle.  Both $M$ and $S(M)$ can still be altered by a man-in-the-middle however, it is unfeasible that the change they made to one, the other, or both will match up correctly after the intended recipient applies the public key to the signature and compares the two.
+
+\paragraph{Going forward} the arms race between prime factorization algorithms and encryption with larger and larger primes rages on.  The larger the prime, the slower encryption and decryption will be, but it also increases the time it takes to reverse the trap-door function between multiplication and factorization. The issue with this particular trap-door function is that it gets weaker and weaker as the prime numbers we use get larger since prime factorization algorithms becomes more efficient as numbers get larger, while multiplication gets less efficient as numbers get larger.  If we view the security of RSA as an arms race, eventually as computing power increases into the future, factorization is going to win out over multiplication and RSA will no longer be secure.  Right now, the future of the RSA algorithm is elliptical curve cryptography.  Using the properties of an elliptical curve in the form $y^2=x^3+ax+b$ we can create a trap-door function that remains constant with respect to the size of the numbers used.  This is not the only benefit; one can gain an equal level of encryption as the original RSA algorithm using much smaller numbers.  An $228$-bit key in elliptical curve cryptography gives the security roughly equivalent to a $2380$-bit key in RSA.  So although the original RSA cryptosystem published by Ron Rivest, Adi Shamir, and Len Adleman may dissappear from public use not too far into the future and be replaced by elliptical curve cryptography, the concepts of the public key cryptosystem published by Whitfield Diffie and Martin Hellman in 1976 won't be going anywhere anytime soon as long as anyone wants to use the Internet for encrypted communication.
+
+
+\begin{thebibliography}{9}
+
+\bibitem{algos} Cormen, Thomas H. "Number-Theoretic Algorithms." \emph{Introduction to Algorithms}. 3rd ed. Cambridge, Mass.: MIT, 2009. Print. 
+\bibitem{mor_rsa} Morrow, Jim. "The RSA Algorithm." University of Washington, 3 June 2009. Web. 3 Nov. 2014. \textless\url{https://www.math.washington.edu/~morrow/336_09/papers/Yevgeny.pdf}\textgreater.
+\bibitem{shap} Shapley, D., and G. B. Kolata. "Cryptology: Scientists Puzzle Over Threat to Open Research, Publication." \emph{Science} (1977): 1345-349. JSTOR. Web. 3 Nov. 2014. \textless\url{http://0-www.jstor.org.wncln.wncln.org/stable/1744699}\textgreater.
+\bibitem{silv} Silverman, Joseph H. "Powers Modulo M and Successive Squaring." \emph{A Friendly Introduction to Number Theory}. 3rd ed. Upper Saddle River, New Jersey: Pearson Prentice Hall, 2006. Print.
+\bibitem{sull} Sullivan, Nick. "A (relatively Easy to Understand) Primer on Elliptic Curve Cryptography." \emph{Ars Technica}. 24 Oct. 2013. Web. 10 Nov. 2014. \textless\url{http://arstechnica.com/security/2013/10/a-relatively-easy-to-understand-primer-on-elliptic-curve-cryptography/3/}\textgreater. 
+
+
+\end{thebibliography}
+
 
 
 
