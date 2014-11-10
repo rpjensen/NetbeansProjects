@@ -7,7 +7,7 @@
 
 
 \documentclass[12pt]{article}
-\usepackage{amssymb,amsmath, amsfonts}
+\usepackage{amssymb,amsmath, amsfonts, amsthm}
 \usepackage{setspace}
 \usepackage{fullpage}
 \usepackage{indentfirst}
@@ -15,6 +15,18 @@
 \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
 \newcommand{\Z}{\mathbb{Z}}
 \newcommand{\N}{\mathbb{N}}
+
+% Theorem Styles
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+% Definition Styles
+\newtheorem{definition}{Definition}[section]
+\newtheorem{example}{Example}[section]
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
 
 
 \begin{document}
@@ -62,9 +74,39 @@ Public key cryptosystems are conceptually very simple and satisfy the constraint
 
 \paragraph{Now that} $e,d,n$ are all chosen we can define the public key we publish to be $P=(e,n)$.  The encryption function $P(M)= M^e \pmod{n}$, applies the public key to an encoded message $M$ and creates encrypted cipher-text $C$.  Now we define the private key kept secret as $S=(d,n)$.  The decryption function $S(C) = M^d \pmod{n}$, applies the private key to encrypted cipher-text $C$ and returns an encoded message $M$.  In order to show that the functions we defined are correct, we must prove that $P$ and $S$ are in fact inverses of each other or that, $S(P(M)) = M$ and $P(S(M) = M$. 
 
+\section{Mathematical Proof of Correctness}
 
+The following background information will be necessary to prove that $P$ and $S$ are inverses of each other for all possible encoded messages $M$ we could create.
+\begin{theorem}
+\label{eul_thm}
+\emph{\textbf{(Euler's Formula)}} If $\gcd(a, n) = 1$, then $a^{\phi(n)}\equiv 1 \pmod{n}$
+\end{theorem}
 
+\begin{theorem}
+\label{chi_thm}
+\emph{\textbf{Chinese Remainder Theorem}}  If $n_1,n_2,...,n_k$ are pairwise relatively prime and $n=n_1n_2...n_k$, then for any integers $a_1,a_2,...,a_k$, the set of simultaneous equations
+\[x\equiv a_i \pmod{n_i}\]
+for $i=1,2,...,k$, has a unique solution modulo $n$ for the unknown $x$.
+\end{theorem}
 
+\begin{corollary}
+\label{chi_thm2}
+If $n_1,n_2,...,n_k$ are pairwise relatively prime and $n=n_1n_2...n_k$, then for all integers $x$ and $a$,
+\[x \equiv a \pmod{n_i}\]
+for $i=1,2,...,k$ if and only if
+\[x \equiv a \pmod{n} \].
+\end{corollary}
+
+Now we have all of the necessary components to formally prove the inverse nature of $P$ and $S$ over the set of all messages $M$.
+
+\begin{definition}
+For all $M\in \Z$, for all positive, prime integers $p,q$, and for $n=pq$.  If $e\in \N$ and $\gcd(e,\phi(n))=1$ and $d = e^{-1}\pmod{\phi(n)}$ then $M^{ed}\equiv M \pmod{n}$.
+\end{definition}
+
+\begin{proof}
+Let $M\in \Z$, let $p,q$ be positive, prime integers.  Define $n=pq$ and compute $\phi(n) = (p-1)(q-1)$.  Next pick $e\in \N$ so that $e$ is relatively prime to $\phi(n)$ or that $\gcd(e,\phi(n))=1$.  By the linear congruence theorem the equation $ed \equiv 1 \pmod{\phi(n)}$ has exactly $g = \gcd(e,\phi(n))$ solutions if $g \mid 1$; thus $d = e^{-1} \pmod{\phi(n)}$ exists and is unique since $g=1$ and $1\mid 1$.
+
+\end{proof}
 
 
 
