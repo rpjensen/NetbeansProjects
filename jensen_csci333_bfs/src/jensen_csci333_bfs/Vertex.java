@@ -126,7 +126,8 @@ public class Vertex {
      * @param color the desired color of this vertex. Must be one of the
      * following: Vertex.WHITE, Vertex.GRAY, Vertex.BLACK.
      * @throws IllegalArgumentException Thrown when the parameter is not any of the following:
-     * Vertex.WHITE, Vertex.GRAY, Vertex.BLACK.
+     * Vertex.WHITE, Vertex.GRAY, Vertex.BLACK. (I changed these to runtime since 
+     * they were more of programming errors in this context and no try/catching needed)
      */
     public void setColor(int color) {
         if (color != Vertex.WHITE && color != Vertex.GRAY && color != Vertex.BLACK) {
@@ -139,7 +140,9 @@ public class Vertex {
      *
      * @param distance Distance from source vertex in the breadth-first tree.
      * Must be nonnegative -- 0 or greater.
-     * @throws IllegalArgumentException Thrown when distance is negative. Note: When any Vertex is constructed, it is automatically set with a Vertex.INFINITE distance.
+     * @throws IllegalArgumentException Thrown when distance is negative. 
+     * Note: When any Vertex is constructed, it is automatically set with a Vertex.INFINITE distance.
+     * (I changed these to runtime since they were more of programming errors in this context and no try/catch needed)
      */
     public void setDistance(int distance) {
         if (distance < 0) {

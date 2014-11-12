@@ -48,6 +48,17 @@ public class Graph {
     }
     
     /**
+     * Getter for a particular vertex in the graph
+     * @param index the index of this vertex between [0,order-1]
+     * @return the vertex handle if the index was valid
+     * @throws IllegalArgumentException if the index was out of bounds
+     */
+    public Vertex getVertex(int index){
+        if (index < 0 || index >= order){ throw new IllegalArgumentException("Index should be between 0 and order-1");}
+        return vertices[index];
+    }
+    
+    /**
      * Creates a string representation of the graph.  The general form follows:
      * "Vertex Order: order
      *  Vertex.toString (each on its own row)
