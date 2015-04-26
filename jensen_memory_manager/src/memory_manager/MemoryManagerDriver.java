@@ -9,7 +9,9 @@ public class MemoryManagerDriver {
         
          Create a memory manager object, allocate address spaces for several
          processes, then print the memory map.
+        */
         
+        /*
          Deallocate a few address spaces, and print the memory map again.
         
          Allocate a few smaller address spaces, which will end up being
